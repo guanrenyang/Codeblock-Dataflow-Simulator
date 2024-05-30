@@ -16,6 +16,7 @@ public:
     /* Fetch the next instruction from the scheduler
      * execute the instruction */
 
+    void copy(); // TODO: design a better copy interface
 private:
     std::shared_ptr<LocalScheduler> scheduler;
 

@@ -3,5 +3,11 @@
 
 
 int main() {
-        return 0;
+  int cycles = 100;
+  PE pe;
+  for (int i = 0; i < cycles; i++) {
+    pe.execute_cycle();
+  }
+
+  return 0;
 }
