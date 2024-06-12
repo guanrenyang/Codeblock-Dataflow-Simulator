@@ -1,6 +1,5 @@
-#include "common.h"
-#include "PE.h"
-
+#include "include/common.h"
+#include "include/PE.h"
 
 int main() {
   int cycles = 100;
