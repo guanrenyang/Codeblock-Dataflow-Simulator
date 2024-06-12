@@ -7,4 +7,5 @@ include_directories(include)
 
 file(GLOB SOURCES "src/*.cc" "main.cc")
 
-add_executable(Dataflow-Simulator ${SOURCES})
+add_executable(Dataflow-Simulator ${SOURCES}
+        src/VectorRegister.cpp)
