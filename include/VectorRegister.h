@@ -33,7 +33,7 @@ public:
     DataType get_data_type() const;
 
 private:
-    std::vector<uint8_t> data;
+    std::vector<uint8_t> data; // TODO: make `data` a C stype array instead of std::vector in order to perform casting from uint8_t to other data types
     DataType data_type;
 };
 

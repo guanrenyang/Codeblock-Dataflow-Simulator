@@ -5,23 +5,23 @@
 #include "Inst.h"
 #include "CodeBlock.h"
 #include "LocalScheduler.h"
-
+#include "SPM.h"
 class PE {
 public:
-    PE(std::unique_ptr<LocalScheduler> scheduler_ptr){
+    PE(std::unique_ptr<LocalScheduler> scheduler_ptr, std::shared_ptr<SPM> spm_ptr){
         reg = VectorRegisterFile(2048);
         scheduler = std::move(scheduler_ptr);
+        accessable_memory = std::move(spm_ptr);
     }
 
     void execute_cycle() {
         auto inst = scheduler->getReadyInstruction();
-        inst->execute(reg);
+        inst->execute(reg, accessable_memory);
     }; // perform the operations in the current cycle
 
     /* Fetch the next instruction from the scheduler
      * execute the instruction */
-
-    void copy(); // TODO: design a better copy interface
+    void copy(); // TODO: design a machesim to simulate the copy operation
 
     void display_reg(int idx) {
         assert(idx < 2048);
@@ -41,6 +41,7 @@ public:
 private:
     std::unique_ptr<LocalScheduler> scheduler;
 
+    std::shared_ptr<SPM> accessable_memory;
     /* Hardware resources */
     std::vector<VectorRegister> reg;
 };
