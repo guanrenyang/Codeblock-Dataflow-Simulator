@@ -12,6 +12,8 @@ public:
     uint8_t operator[](const int i) const { return data[i]; }
     uint8_t& operator[](const int i) { return data[i]; }
 
+    // overload +
+
     void write_reg(const std::vector<uint8_t>& new_data) {
         data = new_data;
     }

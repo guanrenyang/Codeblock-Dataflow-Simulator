@@ -7,7 +7,7 @@ class Inst {
 public:
     virtual ~Inst() = default;
 
-    virtual void execute(std::vector<VectorRegister>& reg) = 0;
+    virtual void execute(std::vector<VectorRegister>& reg);
 };
 
 class CalInst final : public Inst {
@@ -16,7 +16,9 @@ public:
     int dst;
     int src0;
     int src1;
-    void execute(std::vector<VectorRegister> &reg) override;
+    void execute(std::vector<VectorRegister> &reg) override {
+        reg[dst] = reg[src0] + reg[src1]; // add
+    };
 };
 
 class LdInst final : public Inst {

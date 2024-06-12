@@ -8,7 +8,7 @@
 class LocalScheduler {
 public:
     void addCodeBlock(std::shared_ptr<CodeBlock> CodeBlock);
-    void getReadyInstruction(int instruction_type);
+    Inst getReadyInstruction();
 private:
     std::vector<std::shared_ptr<CodeBlock>> waiting_CodeBlocks;
     std::vector<std::shared_ptr<CodeBlock>> ready_CodeBlocks;

@@ -2,6 +2,7 @@
 #define PE_H
 
 #include "common.h"
+#include "Inst.h"
 #include "CodeBlock.h"
 #include "LocalScheduler.h"
 
@@ -12,7 +13,10 @@ public:
         reg = std::vector<VectorRegister>(2048);
     }
 
-    void execute_cycle(){}; // perform the operations in the current cycle
+    void execute_cycle() {
+        Inst inst = scheduler->getReadyInstruction();
+        inst.execute(reg);
+    }; // perform the operations in the current cycle
     /* Fetch the next instruction from the scheduler
      * execute the instruction */
 
