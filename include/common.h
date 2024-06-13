@@ -15,4 +15,9 @@ enum class DataType {
     FLOAT64,
 };
 
+enum class InstType {
+    FP32_ADD,
+    FP32_MUL,
+};
+
 #endif //COMMON_H

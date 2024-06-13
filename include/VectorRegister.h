@@ -8,34 +8,21 @@
 
 class VectorRegister;
 typedef std::vector<VectorRegister> VectorRegisterFile;
+typedef std::array<uint8_t, 128> VectorData;
 
 /* 1024 bit vector register */
 class VectorRegister {
 public:
-    explicit VectorRegister(DataType dtype = DataType::FLOAT32) {
-        data = std::vector<uint8_t>(128, 0);
-        data_type = dtype;
-    }
+    explicit VectorRegister(DataType dtype = DataType::FLOAT32) {}
 
     uint8_t operator[](const int i) const { return data[i]; }
     uint8_t& operator[](const int i) { return data[i]; }
 
-    void write_reg(std::vector<uint8_t> new_data) {
-        data = std::move(new_data);
-    }
-
-    std::vector<uint8_t> read_reg() const {
-        return data;
-    }
-
-    /* utils */
-    int num_element() const;
-    DataType get_data_type() const;
+    VectorData read_reg() const ;
+    void write_reg(const VectorData& new_data);
 
 private:
-    std::vector<uint8_t> data; // TODO: make `data` a C stype array instead of std::vector in order to perform casting from uint8_t to other data types
-    DataType data_type;
+    VectorData data; 
 };
-
 
 #endif //VECTORREGISTER_H
