@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <vector>
+#include <array>
 #include <memory>
 #include <iostream>
 

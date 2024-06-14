@@ -1,6 +1,7 @@
 #ifndef CODEBLOCK_H
 #define CODEBLOCK_H
 
+#include <memory>
 #include <set>
 
 #include "common.h"
@@ -39,6 +40,9 @@ public:
     }
 
     std::shared_ptr<Inst> popInstruction() {
+        if (inst_stream.empty())
+            return std::make_shared<NopInst>();
+
         auto inst = inst_stream.back();
         inst_stream.pop_back();
         return inst;

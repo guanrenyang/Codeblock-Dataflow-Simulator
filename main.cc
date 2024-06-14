@@ -6,7 +6,7 @@
 
 int main() {
   // Front-end: Define a dataflow graph
-  std::shared_ptr<Inst> test_inst = std::make_shared<CalInst>(0, 0, 1, 2);
+  std::shared_ptr<Inst> test_inst = std::make_shared<CalInst>(0, 2, 0, 1);
 
   std::shared_ptr<CodeBlock> code_block = std::make_shared<CodeBlock>();
   code_block->append_instruction(test_inst);
@@ -24,6 +24,8 @@ int main() {
     pe.execute_cycle();
   }
 
-  pe.display_regfile();
+  pe.display_reg_as_fp32(0);
+  pe.display_reg_as_fp32(1);
+  pe.display_reg_as_fp32(2);
   return 0;
 }

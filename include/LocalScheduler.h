@@ -15,8 +15,9 @@ public:
         */
         ready_CodeBlocks.emplace_back(CodeBlock);
     };
+
     std::shared_ptr<Inst> getReadyInstruction() {
-        if(current_CodeBlock == nullptr || current_CodeBlock->empty()) {
+        if(current_CodeBlock == nullptr || current_CodeBlock->empty()) { // get next ready CodeBlock
             if(ready_CodeBlocks.empty()) {
                 return std::make_shared<NopInst>();
             }
@@ -24,12 +25,8 @@ public:
             ready_CodeBlocks.pop_back();
         }
 
-        auto inst = current_CodeBlock->popInstruction();
+        auto inst = current_CodeBlock->popInstruction(); // The instruction must be valid becasuse of the check above
 
-        if(current_CodeBlock->empty()) {
-            current_CodeBlock = nullptr;
-            return std::make_shared<NopInst>();
-        }
         return inst;
     };
 private:
