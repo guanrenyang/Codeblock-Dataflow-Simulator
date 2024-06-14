@@ -15,11 +15,11 @@ class VectorRegister {
 public:
     explicit VectorRegister(DataType dtype = DataType::FLOAT32) {
         /* test */
-        uint8_t* data_ptr = data.data();
-        auto* fp32_data_ptr = reinterpret_cast<float*>(data_ptr);
-        for (int i = 0; i < 128/sizeof(float); i++) {
-            fp32_data_ptr[i] = static_cast<float>(i);
-        }
+        // uint8_t* data_ptr = data.data();
+        // auto* fp32_data_ptr = reinterpret_cast<float*>(data_ptr);
+        // for (int i = 0; i < 128/sizeof(float); i++) {
+        //     fp32_data_ptr[i] = static_cast<float>(i);
+        // }
     }
 
     uint8_t operator[](const int i) const { return data[i]; }
