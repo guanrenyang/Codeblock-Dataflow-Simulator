@@ -110,14 +110,14 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
 };
 
 void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {
-    VectorRegister data_reg = memory->read(addr);
-    VectorData dst_data = data_reg.read_reg();
+    VectorData dst_data = memory->read(addr);
     reg[dst].write_reg(dst_data);
 };
 
 void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {
     VectorRegister src_reg = reg[src];
-    memory->write(addr, src_reg);
+    VectorData data_stored = src_reg.read_reg();
+    memory->write(addr, data_stored);
 };
 
 
