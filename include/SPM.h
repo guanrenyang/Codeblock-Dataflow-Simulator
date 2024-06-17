@@ -7,16 +7,18 @@
 class SPM { // Scratchpad Memory
 private:
     uint8_t *data;
+    int size;
 
 public:
     SPM(int size = 6*1024*1024) { // 6MB
         data = new uint8_t[size];
+        this->size = size;
     }
     ~SPM(){
         delete[] data;
     }
 
-    VectorRegister read(uint32_t addr);
+    VectorData read(uint32_t addr);
     void write(uint32_t addr, VectorRegister data);
 };
 #endif
