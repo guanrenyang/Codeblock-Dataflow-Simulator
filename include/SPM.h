@@ -19,6 +19,6 @@ public:
     }
 
     VectorData read(uint32_t addr);
-    void write(uint32_t addr, VectorRegister data);
+    void write(uint32_t addr, VectorData src);
 };
 #endif
