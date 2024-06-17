@@ -10,14 +10,7 @@
 class CodeBlock {
 
 public:
-    CodeBlock(): constraint_cnt(0) {}
-
-    /* TODO:
-        When a CodeBlock has executed all its instructions, it signals all is downstream CodeBlocks
-        A CodeBlock is ready to execute when all its upstream CodeBlocks have finished executing
-    */
-    // add a count of upstream CodeBlock to the current CodeBlock
-
+    CodeBlock(): constraint_cnt(0), constraint_delta(0) {}
 
     // add a downstream CodeBlock to the current CodeBlock
     void connect_to(const std::shared_ptr<CodeBlock>& cb) {
@@ -47,15 +40,21 @@ public:
         if (empty()) {
             // signal all downstream CodeBlocks
             for (const auto& cb : to_signal) {
-                cb->constraint_cnt--;
+                cb->constraint_delta++;
             }
         }
 
         return inst;
     }
 
+    void update_constraint(){
+        constraint_cnt -= constraint_delta;
+        constraint_delta = 0;
+    }
+
 private:
     int constraint_cnt;
+    int constraint_delta; // update at the entry of the next cycle
     std::vector<std::shared_ptr<Inst>> inst_stream;
     std::set<std::shared_ptr<CodeBlock>> to_signal; // downstream CodeBlocks
 

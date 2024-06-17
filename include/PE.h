@@ -8,9 +8,14 @@
 #include "SPM.h"
 class PE {
 public:
-    PE(std::unique_ptr<LocalScheduler> scheduler_ptr, std::shared_ptr<SPM> spm_ptr){
+    /*PE(){
         reg = VectorRegisterFile(2048);
-        scheduler = std::move(scheduler_ptr);
+        scheduler = std::make_unique<LocalScheduler>();
+    };*/
+
+    PE(std::shared_ptr<SPM> spm_ptr= nullptr) {
+        reg = VectorRegisterFile(2048);
+        scheduler = std::make_unique<LocalScheduler>();
         accessable_memory = std::move(spm_ptr);
     }
 
@@ -19,8 +24,14 @@ public:
         inst->execute(reg, accessable_memory);
     }; // perform the operations in the current cycle
 
-    /* Fetch the next instruction from the scheduler
-     * execute the instruction */
+    void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {
+        scheduler->addCodeBlock(code_block);
+    }
+
+    void set_memory(std::shared_ptr<SPM> spm_ptr) {
+        accessable_memory = std::move(spm_ptr);
+    }
+
     void copy(); // TODO: design a machesim to simulate the copy operation
 
     void display_reg_as_fp32(int idx) {

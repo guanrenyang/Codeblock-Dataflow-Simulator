@@ -10,11 +10,11 @@
 /* In current design, Scheduler is assgined to each PE */
 class LocalScheduler {
 public:
-    void addCodeBlock(const std::shared_ptr<CodeBlock>& CodeBlock) {
+    void addCodeBlock(std::shared_ptr<CodeBlock> code_block) {
         /* This is now a naive implementation for testing
             TODO: Place the four types of instructions in a CodeBlock into their respective instruction queues.
         */
-        waiting_CodeBlocks.insert(CodeBlock);
+        waiting_CodeBlocks.insert(code_block);
     };
 
     std::shared_ptr<Inst> getReadyInstruction() {

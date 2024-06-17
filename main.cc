@@ -1,8 +1,10 @@
 #include <algorithm>
 
 #include "include/common.h"
-#include "include/PE.h"
-#include "include/SPM.h"
+// #include "include/PE.h"
+// #include "include/SPM.h"
+
+#include "PEArray.h"
 
 int main() {
   // Front-end: Define a dataflow graph
@@ -16,24 +18,31 @@ int main() {
 
   code_block_0->connect_to(code_block_1);
 
-  // A local scheduler is affined to a PE, and it holds a sub-DFG
-  std::unique_ptr<LocalScheduler> scheduler = std::make_unique<LocalScheduler>();
-  scheduler->addCodeBlock(code_block_0);
-  scheduler->addCodeBlock(code_block_1);
+  // Back-end: PE excuting the dataflow graph
 
-  // Back-end: PE excuting the dataflow graph 
-  std::shared_ptr<SPM> spm = std::make_shared<SPM>();
-  PE pe(std::move(scheduler), spm);
+  PEArray<4, 4, 6*1024*1024> pe_array;
+  pe_array.add_CodeBlock(0, 0, code_block_0);
+  pe_array.add_CodeBlock(0, 1, code_block_1);
 
-  int cycles = 100;
+  int cycles = 2;
   for (int i = 0; i < cycles; i++) {
-    pe.execute_cycle();
-  }
+      // update the constraints of each code block
+      code_block_0->update_constraint();
+      code_block_1->update_constraint();
 
-  pe.display_reg_as_fp32(0);
-  pe.display_reg_as_fp32(1);
-  pe.display_reg_as_fp32(2);
-  pe.display_reg_as_fp32(3);
-  pe.display_reg_as_fp32(4);
+      // PE performs execution at the cycle,
+      pe_array.execute_cycle();
+
+      // show result
+      std::cout << "After cycle " << i << " :\n";
+      pe_array.display_reg(0, 0, 2);
+      pe_array.display_reg(0, 1, 4);
+      std::cout << std::endl;
+  }
+  // pe.display_reg_as_fp32(0);
+  // pe.display_reg_as_fp32(1);
+  // pe.display_reg_as_fp32(2);
+  // pe.display_reg_as_fp32(3);
+  // pe.display_reg_as_fp32(4);
   return 0;
 }
