@@ -47,15 +47,21 @@ public:
         if (empty()) {
             // signal all downstream CodeBlocks
             for (const auto& cb : to_signal) {
-                cb->constraint_cnt--;
+                cb->constraint_delta++;
             }
         }
 
         return inst;
     }
 
+    void update_constraint(){
+        constraint_cnt -= constraint_delta;
+        constraint_delta = 0;
+    }
+
 private:
     int constraint_cnt;
+    int constraint_delta; // update at the entry of the next cycle
     std::vector<std::shared_ptr<Inst>> inst_stream;
     std::set<std::shared_ptr<CodeBlock>> to_signal; // downstream CodeBlocks
 
