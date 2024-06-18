@@ -8,20 +8,15 @@
 #include "SPM.h"
 class PE {
 public:
-    /*PE(){
-        reg = VectorRegisterFile(2048);
+    PE(std::shared_ptr<VectorRegisterFile> reg_file = nullptr, std::shared_ptr<SPM> spm_ptr = nullptr){
         scheduler = std::make_unique<LocalScheduler>();
-    };*/
-
-    PE(std::shared_ptr<SPM> spm_ptr= nullptr) {
-        reg = VectorRegisterFile(2048);
-        scheduler = std::make_unique<LocalScheduler>();
+        accessable_reg = std::move(reg_file);
         accessable_memory = std::move(spm_ptr);
     }
 
     void execute_cycle() {
         auto inst = scheduler->getReadyInstruction();
-        inst->execute(reg, accessable_memory);
+        inst->execute(*accessable_reg, accessable_memory);
     }; // perform the operations in the current cycle
 
     void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {
@@ -32,11 +27,15 @@ public:
         accessable_memory = std::move(spm_ptr);
     }
 
+    void set_register_file(std::shared_ptr<VectorRegisterFile> reg_file) {
+        accessable_reg = std::move(reg_file);
+    }
+
     void copy(); // TODO: design a machesim to simulate the copy operation
 
     void display_reg_as_fp32(int idx) {
         assert(idx < 2048);
-        VectorData data = reg[idx].read_reg();
+        VectorData data = (*accessable_reg)[idx].read_reg();
         auto* fp32_data_ptr = reinterpret_cast<float*>(data.data());
         for (int i=0;i<128/sizeof(float);i++) {
             std::cout << fp32_data_ptr[i] << " ";
@@ -44,7 +43,7 @@ public:
         std::cout << std::endl;
     }
     void display_regfile() {
-        for (const auto& innerVec : reg) {
+        for (const auto& innerVec : (*accessable_reg)) {
             for (uint8_t num : innerVec.read_reg()) {
                 std::cout << static_cast<int>(num) << " ";  // Cast to int for readable output
             }
@@ -54,10 +53,8 @@ public:
 private:
     std::unique_ptr<LocalScheduler> scheduler;
 
-    std::shared_ptr<SPM> accessable_memory;
     /* Hardware resources */
-    std::vector<VectorRegister> reg; };
-
-
-
+    std::shared_ptr<SPM> accessable_memory;
+    std::shared_ptr<VectorRegisterFile> accessable_reg;
+};
 #endif

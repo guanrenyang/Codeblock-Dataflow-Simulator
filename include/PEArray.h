@@ -11,12 +11,18 @@ class PEArray {
     /* The PEArray class manages PEs and On-Chip routers */
 public:
     PEArray() {
-        // make PE array
+        for (int i = 0; i < _num_row; ++i) {
+            for (int j = 0; j < _num_col; ++j) {
+                reg_array_2d[i][j] = std::make_shared<VectorRegisterFile>();
+                (*reg_array_2d[i][j]).resize(2048);
+            }
+        }
         spm = std::make_shared<SPM>(_memory_size);
         // attach memory to each PE
         for (int i = 0; i < _num_row; i++) {
             for (int j = 0; j < _num_col; j++) {
                 PE_array_2d[i][j].set_memory(spm);
+                PE_array_2d[i][j].set_register_file(reg_array_2d[i][j]);
             }
         }
     }
@@ -39,7 +45,8 @@ public:
         PE_array_2d[pe_row][pe_col].display_reg_as_fp32(reg_idx);
     }
 private:
-    std::array<std::array<PE, _num_col>, _num_col> PE_array_2d;
+    std::array<std::array<PE, _num_col>, _num_row> PE_array_2d;
+    std::array<std::array<std::shared_ptr<VectorRegisterFile>, _num_col>, _num_row> reg_array_2d;
     std::shared_ptr<SPM> spm;
 }
 #endif
