@@ -41,5 +41,5 @@ public:
 private:
     std::array<std::array<PE, _num_col>, _num_col> PE_array_2d;
     std::shared_ptr<SPM> spm;
-};
+}
 #endif
