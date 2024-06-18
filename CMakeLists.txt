@@ -5,7 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(include)
 
-file(GLOB SOURCES "src/*.cpp" "main.cc")
+file(GLOB SOURCES "src/*.cpp")
 
-add_executable(Dataflow-Simulator ${SOURCES}
-        src/VectorRegister.cpp)
+add_executable(Dataflow-Simulator ${SOURCES} main.cc)
+
+add_executable(Dataflow-Test ${SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/test/test_load_sotre.cc")

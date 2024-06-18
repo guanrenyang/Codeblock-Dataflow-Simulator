@@ -13,6 +13,10 @@ public:
     SPM(int size = 6*1024*1024) { // 6MB
         data = new uint8_t[size];
         this->size = size;
+        
+        // Initialize some data for testing.
+        for (int i = 0; i < 128; i++) 
+            data[i] = i;
     }
     ~SPM(){
         delete[] data;
@@ -20,5 +24,6 @@ public:
 
     VectorData read(uint32_t addr);
     void write(uint32_t addr, VectorData src);
+
 };
 #endif

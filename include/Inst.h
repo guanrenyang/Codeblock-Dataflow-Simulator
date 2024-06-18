@@ -29,14 +29,16 @@ class LdInst final : public Inst {
 public:
     int dst;
     int addr;
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory)  {}
+    LdInst(int dst, int addr) : dst(dst), addr(addr) {}
+    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory);
 };
 
 class StInst final: public Inst {
 public:
     int src;
     int addr;
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {}
+    StInst(int src, int addr) : src(src), addr(addr) {}
+    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory);
 };
 
 class NopInst final: public Inst {
