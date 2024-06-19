@@ -8,6 +8,7 @@
 #include "SPM.h"
 #include <memory>
 
+
 template <int _num_row, int _num_col, int _memory_size>
 class PEArray {
     /* The PEArray class manages PEs and On-Chip routers */
@@ -46,13 +47,18 @@ public:
         PE_array_2d[pe_row][pe_col].add_CodeBlock(code_block);
     }
 
+    void write_pe_reg(int pe_row, int pe_col, int reg_idx, const VectorData& new_data){
+        (*reg_array_2d[pe_row][pe_col])[reg_idx].write_reg(new_data);
+    }
+
     void display_reg(int pe_row, int pe_col, int reg_idx){
         PE_array_2d[pe_row][pe_col].display_reg_as_fp32(reg_idx);
     }
+
 private:
     std::array<std::array<PE, _num_col>, _num_row> PE_array_2d;
     std::array<std::array<std::shared_ptr<VectorRegisterFile>, _num_col>, _num_row> reg_array_2d;
     std::shared_ptr<SPM> spm;
     std::shared_ptr<Router> router;
-}
+};
 #endif
