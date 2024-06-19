@@ -23,20 +23,19 @@ public:
     }
 
     bool empty() {
-        return inst_stream.empty();
+        return inst_stream.empty(); // TODO: && waiting_inst.empty();
     }
 
     bool ready() {
         return constraint_cnt==0;
     }
-
+    
     std::shared_ptr<Inst> popInstruction() {
         if (inst_stream.empty())
             return std::make_shared<NopInst>();
 
         auto inst = inst_stream.back();
         inst_stream.pop_back();
-
         if (empty()) {
             // signal all downstream CodeBlocks
             for (const auto& cb : to_signal) {
@@ -53,11 +52,13 @@ public:
     }
 
 private:
+    std::vector<std::shared_ptr<Inst>> inst_stream;
+
+    /* Inter-CodeBlock constraints*/
     int constraint_cnt;
     int constraint_delta; // update at the entry of the next cycle
-    std::vector<std::shared_ptr<Inst>> inst_stream;
     std::set<std::shared_ptr<CodeBlock>> to_signal; // downstream CodeBlocks
-
+    
     void add_constraint() {
         constraint_cnt++;
     }

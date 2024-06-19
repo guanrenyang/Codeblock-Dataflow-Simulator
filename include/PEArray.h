@@ -1,10 +1,12 @@
 #ifndef PEARRAY_H
 #define PEARRAY_H
 
+#include "Router.h"
 #include "common.h"
 #include "LocalScheduler.h"
 #include "PE.h"
 #include "SPM.h"
+#include <memory>
 
 template <int _num_row, int _num_col, int _memory_size>
 class PEArray {
@@ -18,11 +20,14 @@ public:
             }
         }
         spm = std::make_shared<SPM>(_memory_size);
+        router = std::make_shared<Router>();
+
         // attach memory to each PE
         for (int i = 0; i < _num_row; i++) {
             for (int j = 0; j < _num_col; j++) {
                 PE_array_2d[i][j].set_memory(spm);
                 PE_array_2d[i][j].set_register_file(reg_array_2d[i][j]);
+                
             }
         }
     }
@@ -48,5 +53,6 @@ private:
     std::array<std::array<PE, _num_col>, _num_row> PE_array_2d;
     std::array<std::array<std::shared_ptr<VectorRegisterFile>, _num_col>, _num_row> reg_array_2d;
     std::shared_ptr<SPM> spm;
+    std::shared_ptr<Router> router;
 }
 #endif

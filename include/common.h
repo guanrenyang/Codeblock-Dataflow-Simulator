@@ -5,6 +5,7 @@
 #include <array>
 #include <memory>
 #include <iostream>
+#include <cstdlib>
 
 enum class DataType {
     INT8,

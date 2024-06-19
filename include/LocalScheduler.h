@@ -7,6 +7,14 @@
 
 #include "CodeBlock.h"
 
+class AsyncInstManager {
+    std::set<std::shared_ptr<Inst>> waiting_inst;
+public:
+    bool empty() {return waiting_inst.empty();};
+    void add_async_inst(std::shared_ptr<Inst> inst_ptr);
+    void remove_async_inst(std::shared_ptr<Inst> inst_ptr);
+};
+
 /* In current design, Scheduler is assgined to each PE */
 class LocalScheduler {
 public:
@@ -30,9 +38,14 @@ public:
 
         auto inst = current_CodeBlock->popInstruction(); // The instruction must be valid becasuse of the check above
 
+        // TODO: call the wait method of the instruction to add it to the waiting set
+                
+        // TODO: if inst_stream is empty then return a NopInst
+
         return inst;
     };
 private:
+    AsyncInstManager async_inst_manager;
     std::shared_ptr<CodeBlock> current_CodeBlock;
 
     std::set<std::shared_ptr<CodeBlock>> waiting_CodeBlocks;
