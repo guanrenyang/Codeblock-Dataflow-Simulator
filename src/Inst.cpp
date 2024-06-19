@@ -117,6 +117,7 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
 void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router, const std::shared_ptr<AsyncInstManager> &async_inst_manager) {
     VectorData src_data = reg[src_reg_idx].read_reg();
     std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, src_data, async_inst_manager, shared_from_this());
+    async_inst_manager->add_async_inst(shared_from_this());
     router->put(src_pe_row, src_pe_col, copy_data_package);
 };
 

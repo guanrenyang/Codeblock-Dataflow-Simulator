@@ -9,20 +9,7 @@
 #include <algorithm>
 #include <set>
 #include <queue>
-
-enum class DataType {
-    INT8,
-    INT16,
-    INT32,
-    FLOAT8,
-    FLOAT16,
-    FLOAT32,
-    FLOAT64,
-};
-
-enum class InstType {
-    FP32_ADD,
-    FP32_MUL,
-};
+#include <list>
+#include <assert.h>
 
 #endif //COMMON_H

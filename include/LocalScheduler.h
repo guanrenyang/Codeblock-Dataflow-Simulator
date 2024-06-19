@@ -7,9 +7,10 @@ class CodeBlock;
 class Inst;
 
 class AsyncInstManager {
-    std::set<std::shared_ptr<Inst>> waiting_inst;
+private:
+    std::list<std::shared_ptr<Inst>> waiting_inst;
 public:
-    bool empty() {return waiting_inst.empty();};
+    bool empty();
     void add_async_inst(std::shared_ptr<Inst> inst_ptr);
     void remove_async_inst(std::shared_ptr<Inst> inst_ptr);
 };
@@ -20,7 +21,6 @@ public:
     void addCodeBlock(std::shared_ptr<CodeBlock> code_block);
     std::shared_ptr<Inst> getReadyInstruction();
 private:
-    AsyncInstManager async_inst_manager;
     std::shared_ptr<CodeBlock> current_CodeBlock;
 
     std::set<std::shared_ptr<CodeBlock>> waiting_CodeBlocks;
