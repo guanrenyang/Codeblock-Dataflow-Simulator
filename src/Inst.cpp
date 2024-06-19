@@ -1,4 +1,9 @@
 #include "Inst.h"
+#include "RoutePackage.h"
+#include "SPM.h"
+#include "Router.h"
+#include "VectorRegister.h"
+#include "LocalScheduler.h"
 
 template <typename T>
 static void add_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
@@ -89,7 +94,7 @@ static void gt_vv(VectorData& dst, const VectorData& src0, const VectorData& src
     }
 }
 
-void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {
+void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router, const std::shared_ptr<AsyncInstManager> &async_inst_manager) {
     // TODO: Add other instructions, for now it is vector add
     VectorData dst_data;
 
@@ -109,12 +114,18 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
     reg[dst].write_reg(dst_data);
 };
 
-void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {
+void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router, const std::shared_ptr<AsyncInstManager> &async_inst_manager) {
+    VectorData src_data = reg[src_reg_idx].read_reg();
+    std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, src_data, async_inst_manager, shared_from_this());
+    router->put(src_pe_row, src_pe_col, copy_data_package);
+};
+
+void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router, const std::shared_ptr<AsyncInstManager> &async_inst_manager) {
     VectorData dst_data = memory->read(addr);
     reg[dst].write_reg(dst_data);
 };
 
-void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {
+void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router, const std::shared_ptr<AsyncInstManager> &async_inst_manager) {
     VectorRegister src_reg = reg[src];
     VectorData data_stored = src_reg.read_reg();
     memory->write(addr, data_stored);

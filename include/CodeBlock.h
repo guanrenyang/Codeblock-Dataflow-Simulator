@@ -1,12 +1,8 @@
 #ifndef CODEBLOCK_H
 #define CODEBLOCK_H
 
-#include <memory>
-#include <set>
-
 #include "common.h"
 #include "Inst.h"
-
 class CodeBlock {
 
 public:
