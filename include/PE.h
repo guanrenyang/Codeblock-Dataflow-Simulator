@@ -17,6 +17,8 @@ public:
         accessable_memory = std::move(spm_ptr);
     }
 
+    PE(const PE& other) : scheduler(other.scheduler), accessable_reg(other.accessable_reg), accessable_memory(other.accessable_memory) {}
+
     void execute_cycle() {
         auto inst = scheduler->getReadyInstruction();
         inst->execute(*accessable_reg, accessable_memory);
@@ -49,6 +51,7 @@ public:
         }
         std::cout << std::endl;
     }
+
     void display_regfile() {
         for (const auto& innerVec : (*accessable_reg)) {
             for (uint8_t num : innerVec.read_reg()) {

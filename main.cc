@@ -1,10 +1,10 @@
 #include <algorithm>
 
 #include "include/common.h"
-// #include "include/PE.h"
-// #include "include/SPM.h"
+#include "include/PE.h"
+#include "include/SPM.h"
 
-#include "PEArray.h"
+#include "include/PEArray.h"
 
 int main() {
   // Front-end: Define a dataflow graph
@@ -20,7 +20,7 @@ int main() {
 
   // Back-end: PE excuting the dataflow graph
 
-  PEArray<4, 4, 6*1024*1024> pe_array;
+  PEArray pe_array(4, 4, 6*1024*1024);
   pe_array.add_CodeBlock(0, 0, code_block_0);
   pe_array.add_CodeBlock(0, 1, code_block_1);
 
