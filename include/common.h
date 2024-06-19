@@ -5,16 +5,7 @@
 #include <array>
 #include <memory>
 #include <iostream>
-
-enum class DataType {
-    INT8,
-    INT16,
-    INT32,
-    FLOAT8,
-    FLOAT16,
-    FLOAT32,
-    FLOAT64,
-};
+#include <algorithm>
 
 enum class InstType {
     FP32_ADD,

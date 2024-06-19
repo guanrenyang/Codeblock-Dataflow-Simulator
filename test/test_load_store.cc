@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "../include/common.h"
 #include "../include/PEArray.h"
 

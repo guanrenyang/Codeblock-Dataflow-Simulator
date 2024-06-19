@@ -6,13 +6,16 @@
 #include "CodeBlock.h"
 #include "LocalScheduler.h"
 #include "SPM.h"
+
 class PE {
 public:
     PE(std::shared_ptr<VectorRegisterFile> reg_file = nullptr, std::shared_ptr<SPM> spm_ptr = nullptr){
-        scheduler = std::make_unique<LocalScheduler>();
+        scheduler = std::make_shared<LocalScheduler>();
         accessable_reg = std::move(reg_file);
         accessable_memory = std::move(spm_ptr);
     }
+
+    PE(const PE& other) : scheduler(other.scheduler), accessable_reg(other.accessable_reg), accessable_memory(other.accessable_memory) {}
 
     void execute_cycle() {
         auto inst = scheduler->getReadyInstruction();
@@ -42,6 +45,7 @@ public:
         }
         std::cout << std::endl;
     }
+
     void display_regfile() {
         for (const auto& innerVec : (*accessable_reg)) {
             for (uint8_t num : innerVec.read_reg()) {
@@ -51,7 +55,7 @@ public:
         }
     }
 private:
-    std::unique_ptr<LocalScheduler> scheduler;
+    std::shared_ptr<LocalScheduler> scheduler;
 
     /* Hardware resources */
     std::shared_ptr<SPM> accessable_memory;
