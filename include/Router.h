@@ -1,21 +1,37 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
-#include "PEArray.h"
 #include "VectorRegister.h"
 #include "common.h"
+#include <list>
 #include <memory>
-class RoutePackage;
+#include "RoutePackage.h"
 
-template<int _num_row, int _num_col, int _memory_size>
-class Router {
+class RoutePackage;
+class PEArray;
+
+class Router : public std::enable_shared_from_this<Router>{
 public:
-    //TODO: add a method to get the route package at a specific PE
-    void put(int pe_row_idx, int pe_col_idx, std::shared_ptr<RoutePackage> route_package);
-    void set(int pe_row_idx, int pe_col_idx, int reg_idx, VectorData vector_data); // set specific pe reg
-    //TODO: perform the operations of each route package
-    void execute_cycle(); // perform the operations of each route package
+    std::function<void(int, int, int, VectorData)> write_pe_reg;
+    Router(std::function<void(int, int, int, VectorData)> _write_pe_reg) : write_pe_reg(_write_pe_reg) {}
+
+    void put(int pe_row_idx, int pe_col_idx, std::shared_ptr<RoutePackage> route_package){
+        route_packages.push_back(route_package);
+    };
+
+    void execute_cycle() {
+        // traverse the set
+        for (auto it = route_packages.begin(); it != route_packages.end(); ) {
+            (*it)->execute_cycle(shared_from_this());
+            if ((*it)->is_completed()) {
+                it = route_packages.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
 private:
-    std::vector<RoutePackage> route_package_on_chip;
+    std::list<std::shared_ptr<RoutePackage>> route_packages;
+    // function pointer to PEArray::write_pe_reg
 };
 #endif //ROUTER_H
