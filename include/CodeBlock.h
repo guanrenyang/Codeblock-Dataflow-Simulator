@@ -4,8 +4,7 @@
 #include "common.h"
 #include "Inst.h"
 #include <memory>
-class CodeBlock {
-
+class CodeBlock : public std::enable_shared_from_this<CodeBlock>{
 public:
     CodeBlock(): constraint_cnt(0), constraint_delta(0) {}
 
@@ -16,6 +15,7 @@ public:
     }
 
     void append_instruction(const std::shared_ptr<Inst>& inst_ptr) {
+        inst_ptr->register_code_block(shared_from_this());
         inst_stream.push_back(inst_ptr);
     }
 

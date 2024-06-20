@@ -6,14 +6,21 @@
 class Router;
 class SPM;
 class VectorRegister;
+class CodeBlock;
+
 typedef std::vector<VectorRegister> VectorRegisterFile;
 
-// class AsyncInstManager;
 class Inst : public std::enable_shared_from_this<Inst>{
+protected:
+    std::shared_ptr<CodeBlock> code_block;
 public:
     Inst() {}
     virtual ~Inst() {}
     virtual void execute(VectorRegisterFile& reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) = 0 ;
+
+    void register_code_block(std::shared_ptr<CodeBlock> code_block) { // A inst must be assgined to a codeblock
+        this->code_block = code_block;
+    }
 };
 
 class CalInst final : public Inst {
