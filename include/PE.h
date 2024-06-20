@@ -14,7 +14,6 @@ class PE {
 public:
     PE(std::shared_ptr<Router> router_ptr = nullptr, std::shared_ptr<VectorRegisterFile> reg_file = nullptr, std::shared_ptr<SPM> spm_ptr = nullptr)  {
         scheduler = std::make_shared<LocalScheduler>();
-        async_inst_manager = std::make_shared<AsyncInstManager>();
 
         accessable_reg = std::move(reg_file);
         accessable_memory = std::move(spm_ptr);
@@ -23,7 +22,7 @@ public:
 
     void execute_cycle() {
         auto inst = scheduler->getReadyInstruction();
-        inst->execute(*accessable_reg, accessable_memory, accessable_router, nullptr);
+        inst->execute(*accessable_reg, accessable_memory, accessable_router);
     }; // perform the operations in the current cycle
 
     void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {
@@ -80,7 +79,6 @@ private:
     std::shared_ptr<VectorRegisterFile> accessable_reg;
     std::shared_ptr<Router> accessable_router;
 
-    std::shared_ptr<AsyncInstManager> async_inst_manager;
     // RouterFunctor putOnChip;
 };
 #endif

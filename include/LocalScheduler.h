@@ -6,14 +6,14 @@
 class CodeBlock;
 class Inst;
 
-class AsyncInstManager {
-private:
-    std::list<std::shared_ptr<Inst>> waiting_inst;
-public:
-    bool empty();
-    void add_async_inst(std::shared_ptr<Inst> inst_ptr);
-    void remove_async_inst(std::shared_ptr<Inst> inst_ptr);
-};
+// class AsyncInstManager {
+// private:
+//     std::list<std::shared_ptr<Inst>> waiting_inst;
+// public:
+//     bool empty();
+//     void add_async_inst(std::shared_ptr<Inst> inst_ptr);
+//     void remove_async_inst(std::shared_ptr<Inst> inst_ptr);
+// };
 
 /* In current design, Scheduler is assgined to each PE */
 class LocalScheduler {

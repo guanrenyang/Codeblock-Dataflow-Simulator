@@ -16,7 +16,7 @@ private:
     bool completed = false;
 public:
     int remaining_hops;
-    RoutePackage(std::shared_ptr<AsyncInstManager> async_inst_manager, std::shared_ptr<Inst> inst) ;
+    RoutePackage(std::shared_ptr<Inst> inst) ;
 
     virtual void operate(std::shared_ptr<Router> router) = 0; // perform the operations of each route package
 
@@ -26,7 +26,7 @@ public:
 
 class CopyDataPackage: public RoutePackage {
 public:
-    CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row, int dst_pe_col, int reg_idx, VectorData vector_data, std::shared_ptr<AsyncInstManager> async_inst_manager, std::shared_ptr<Inst> inst);
+    CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row, int dst_pe_col, int reg_idx, VectorData vector_data, std::shared_ptr<Inst> inst);
     void operate(std::shared_ptr<Router> router) ; 
 
     int dst_pe_row_idx;

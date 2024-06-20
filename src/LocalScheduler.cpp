@@ -2,17 +2,17 @@
 #include "CodeBlock.h"
 #include "Inst.h"
 
-void AsyncInstManager::add_async_inst(std::shared_ptr<Inst> inst_ptr) {
-    waiting_inst.push_back(inst_ptr);
-};
+// void AsyncInstManager::add_async_inst(std::shared_ptr<Inst> inst_ptr) {
+//     waiting_inst.push_back(inst_ptr);
+// };
 
-void AsyncInstManager::remove_async_inst(std::shared_ptr<Inst> inst_ptr) {
-    waiting_inst.remove(inst_ptr);
-};
+// void AsyncInstManager::remove_async_inst(std::shared_ptr<Inst> inst_ptr) {
+//     waiting_inst.remove(inst_ptr);
+// };
 
-bool AsyncInstManager::empty() {
-    return waiting_inst.empty();
-};
+// bool AsyncInstManager::empty() {
+//     return waiting_inst.empty();
+// };
 
 void LocalScheduler:: addCodeBlock(std::shared_ptr<CodeBlock> code_block) {
     /* This is now a naive implementation for testing
