@@ -20,8 +20,8 @@ public:
     }
 
     /* CodeBlock states */
-    bool empty() {
-        return inst_stream.empty(); // TODO: && waiting_async_stream.empty();
+    bool empty() { // Non-empty codeblock can't be released by PE
+        return inst_stream.empty() && waiting_async_inst.empty();
     }
 
     // \brief Check if the CodeBlock is ready to be executed
@@ -39,21 +39,27 @@ public:
     }
     
     std::shared_ptr<Inst> popInstruction() {
-        if (inst_stream.empty())
-            return std::make_shared<NopInst>();
+        std::shared_ptr<Inst> return_inst;
 
-        auto inst = inst_stream.back();
-        inst_stream.pop_back();
+        if (inst_stream.empty())
+            return_inst  = std::make_shared<NopInst>();
+        else {
+            // TODO: make inst_stream a queue
+            return_inst = inst_stream.back();
+            inst_stream.pop_back();
+        }
+
+        return return_inst;
+    }
+
+    void signal_downstream() {
         if (empty()) {
-            // signal all downstream CodeBlocks
             for (const auto& cb : to_signal) {
                 cb->constraint_delta++;
             }
         }
-
-        return inst;
     }
-
+    
     void update_constraint(){
         constraint_cnt -= constraint_delta;
         constraint_delta = 0;

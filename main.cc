@@ -26,10 +26,6 @@ int main() {
 
   int cycles = 2;
   for (int i = 0; i < cycles; i++) {
-      // update the constraints of each code block
-      code_block_0->update_constraint();
-      code_block_1->update_constraint();
-
       // PE performs execution at the cycle,
       pe_array.execute_cycle();
 
@@ -38,6 +34,15 @@ int main() {
       pe_array.display_reg(0, 0, 2);
       pe_array.display_reg(0, 1, 4);
       std::cout << std::endl;
+
+      // TODO: add a CodeBlock Manager to manage all the CodeBlocks scattered on the chip
+      // update the constraints of each code block
+      code_block_0->signal_downstream();
+      code_block_1->signal_downstream();
+
+      // code_block_0->update_constraint();
+      code_block_1->update_constraint();
+
   }
   // pe.display_reg_as_fp32(0);
   // pe.display_reg_as_fp32(1);
