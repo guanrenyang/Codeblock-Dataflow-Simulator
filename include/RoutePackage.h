@@ -4,22 +4,19 @@
 #include "common.h"
 
 class Inst;
-class AsyncInstManager;
 class Router;
 
 typedef std::array<uint8_t, 128> VectorData;
 
 class RoutePackage {
 private:
-    std::shared_ptr<AsyncInstManager> _async_inst_manager; // source pe
-    std::shared_ptr<Inst> _inst; // source inst
     bool completed = false;
 public:
+    std::shared_ptr<Inst> inst; // source inst
     int remaining_hops;
-    RoutePackage(std::shared_ptr<Inst> inst) ;
+    RoutePackage(std::shared_ptr<Inst> calling_inst) ;
 
     virtual void operate(std::shared_ptr<Router> router) = 0; // perform the operations of each route package
-
     void execute_cycle(std::shared_ptr<Router> router);  // perform the operations of each route package
     bool is_completed();
 };

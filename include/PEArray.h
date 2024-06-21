@@ -54,6 +54,9 @@ public:
                 PE_array_2d[i][j].execute_cycle();
             }
         } 
+
+        // execute router
+        router->execute_cycle();
     }
 
     void add_CodeBlock(int pe_row, int pe_col, std::shared_ptr<CodeBlock> code_block){

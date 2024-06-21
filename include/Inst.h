@@ -21,6 +21,9 @@ public:
     void register_code_block(std::shared_ptr<CodeBlock> code_block) { // A inst must be assgined to a codeblock
         this->code_block = code_block;
     }
+
+    void register_async_inst();
+    void remove_async_inst(); 
 };
 
 class CalInst final : public Inst {
