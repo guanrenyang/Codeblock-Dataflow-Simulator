@@ -37,7 +37,7 @@ public:
         accessable_reg = std::move(reg_file);
     }
 
-    void set_router(int pe_row, int pe_col, std::shared_ptr<Router> router_ptr) {
+    void set_router(std::shared_ptr<Router> router_ptr) {
         accessable_router = std::move(router_ptr);
     }
 

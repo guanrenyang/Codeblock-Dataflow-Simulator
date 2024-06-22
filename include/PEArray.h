@@ -17,7 +17,7 @@ public:
         for (int i = 0; i < _num_row; ++i) {
             std::vector<PE> row;
             for (int j = 0; j < _num_col; ++j) {
-                row.push_back(PE());
+                row.emplace_back(PE());
             }
             PE_array_2d.push_back(row);
         }
@@ -43,7 +43,7 @@ public:
             for (int j = 0; j < _num_col; j++) {
                 PE_array_2d[i][j].set_memory(spm);
                 PE_array_2d[i][j].set_register_file(reg_array_2d[i][j]);
-                
+                PE_array_2d[i][j].set_router(router);
             }
         }
     }

@@ -11,5 +11,6 @@
 #include <queue>
 #include <list>
 #include <assert.h>
+#include <functional>
 
 #endif //COMMON_H

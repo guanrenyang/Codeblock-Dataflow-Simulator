@@ -21,7 +21,7 @@ int main() {
   pe_array.add_CodeBlock(0, 0, code_block_0);
   pe_array.add_CodeBlock(0, 1, code_block_1);
 
-  int cycles = 2;
+  int cycles = 4;
   for (int i = 0; i < cycles; i++) {
       // PE performs execution at the cycle,
       pe_array.execute_cycle();
