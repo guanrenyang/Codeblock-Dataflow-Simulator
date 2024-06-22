@@ -1,4 +1,9 @@
 #include "Inst.h"
+#include "RoutePackage.h"
+#include "SPM.h"
+#include "Router.h"
+#include "VectorRegister.h"
+#include "CodeBlock.h"
 
 template <typename T>
 static void add_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
@@ -89,7 +94,15 @@ static void gt_vv(VectorData& dst, const VectorData& src0, const VectorData& src
     }
 }
 
-void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {
+void Inst::register_async_inst() {
+    code_block->add_async_inst(shared_from_this());
+}
+
+void Inst::remove_async_inst() {
+    code_block->remove_async_inst(shared_from_this());
+}
+
+void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     // TODO: Add other instructions, for now it is vector add
     VectorData dst_data;
 
@@ -109,12 +122,22 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
     reg[dst].write_reg(dst_data);
 };
 
-void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {
+void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    // Put data on on-chip router
+    VectorData src_data = reg[src_reg_idx].read_reg();
+    std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, src_data, shared_from_this());
+    router->put(src_pe_row, src_pe_col, copy_data_package);
+
+    // register the async instruction
+    this->register_async_inst();
+};
+
+void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     VectorData dst_data = memory->read(addr);
     reg[dst].write_reg(dst_data);
 };
 
-void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory) {
+void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     VectorRegister src_reg = reg[src];
     VectorData data_stored = src_reg.read_reg();
     memory->write(addr, data_stored);
