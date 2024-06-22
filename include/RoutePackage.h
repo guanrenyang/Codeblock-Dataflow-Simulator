@@ -5,6 +5,7 @@
 
 class Inst;
 class Router;
+class SPM;
 
 typedef std::array<uint8_t, 128> VectorData;
 
@@ -21,7 +22,7 @@ public:
     bool is_completed();
 };
 
-class CopyDataPackage: public RoutePackage {
+class CopyDataPackage final : public RoutePackage {
 public:
     CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row, int dst_pe_col, int reg_idx, VectorData vector_data, std::shared_ptr<Inst> inst);
     void operate(std::shared_ptr<Router> router) ; 

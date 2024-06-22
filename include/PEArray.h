@@ -34,9 +34,11 @@ public:
 
         // initialize SPM
         spm = std::make_shared<SPM>(_memory_size);
-        router = std::make_shared<Router>([this](int pe_row, int pe_col, int reg_idx, VectorData new_data){
-            this->write_pe_reg(pe_row, pe_col, reg_idx, new_data);
-        });
+        router = std::make_shared<Router>(
+                [this](int pe_row, int pe_col, int reg_idx, VectorData new_data){this->write_pe_reg(pe_row, pe_col, reg_idx, new_data);},
+                [this](uint32_t addr){return this->spm->read(addr);},
+                [this](uint32_t addr, VectorData new_data){this->spm->write(addr, new_data);}
+        );
 
         // attach memory to each PE
         for (int i = 0; i < _num_row; i++) {
