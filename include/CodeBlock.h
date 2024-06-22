@@ -16,7 +16,7 @@ public:
 
     void append_instruction(const std::shared_ptr<Inst>& inst_ptr) {
         inst_ptr->register_code_block(shared_from_this());
-        inst_stream.push_back(inst_ptr);
+        inst_stream.push(inst_ptr);
     }
 
     /* CodeBlock states */
@@ -45,8 +45,8 @@ public:
             return_inst  = std::make_shared<NopInst>();
         else {
             // TODO: make inst_stream a queue
-            return_inst = inst_stream.back();
-            inst_stream.pop_back();
+            return_inst = inst_stream.front();
+            inst_stream.pop();
         }
 
         return return_inst;
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<Inst>> inst_stream;
+    std::queue<std::shared_ptr<Inst>> inst_stream;
     std::list<std::shared_ptr<Inst>> waiting_async_inst;
 
     /* Inter-CodeBlock constraints*/
