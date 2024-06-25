@@ -133,8 +133,11 @@ void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memo
 };
 
 void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    VectorData dst_data = memory->read(addr);
-    reg[dst].write_reg(dst_data);
+    //VectorData dst_data = memory->read(addr);
+    std::shared_ptr<RoutePackage> load_signal_package = std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx, addr, shared_from_this());
+    router->put(dst_pe_row, dst_pe_col, load_signal_package);
+    //reg[dst].write_reg(dst_data);
+    this->register_async_inst();
 };
 
 void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {

@@ -3,6 +3,8 @@
 
 #include "common.h"
 #include "VectorRegister.h"
+#include "Router.h"
+#include "Inst.h"
 
 class SPM { // Scratchpad Memory
 private:
@@ -22,7 +24,7 @@ public:
         delete[] data;
     }
 
-    VectorData read(uint32_t addr);
+    void read(int pe_row, int pe_col, int reg_idx, uint32_t addr, std::shared_ptr<Inst> inst, std::shared_ptr<Router> router);
     void write(uint32_t addr, VectorData src);
 
 };

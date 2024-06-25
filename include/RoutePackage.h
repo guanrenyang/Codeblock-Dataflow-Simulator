@@ -35,10 +35,24 @@ public:
 
 class LoadSignalPackage: public RoutePackage {
     // Read SPM
+public:
+    LoadSignalPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr, std::shared_ptr<Inst> inst);
+    void operate(std::shared_ptr<Router> router, std::shared_ptr<SPM>& memory) ; 
+    int dst_pe_row_idx;
+    int dst_pe_col_idx;
+    int reg_idx;
+    int spm_addr;
 };
 
 class LoadDataPackage: public RoutePackage {
     // Write to reg
+public:
+    LoadDataPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, VectorData dst_data, std::shared_ptr<Inst> inst);
+    void operate(std::shared_ptr<Router> router);
+    int dst_pe_row_idx;
+    int dst_pe_col_idx;
+    int reg_idx;
+    VectorData data;
 };
 
 class StoreDataPackage: public RoutePackage {
