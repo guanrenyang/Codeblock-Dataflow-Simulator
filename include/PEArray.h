@@ -36,7 +36,7 @@ public:
         spm = std::make_shared<SPM>(_memory_size);
         router = std::make_shared<Router>(
                 [this](int pe_row, int pe_col, int reg_idx, VectorData new_data){this->write_pe_reg(pe_row, pe_col, reg_idx, new_data);},
-                [this](uint32_t addr){return this->spm->read(addr);},
+                [this](int pe_row, int pe_col, int reg_idx, uint32_t addr, std::shared_ptr<Inst> inst, std::shared_ptr<Router> router){return this->spm->read(pe_row, pe_col, reg_idx, addr, inst, router);},
                 [this](uint32_t addr, VectorData new_data){this->spm->write(addr, new_data);}
         );
 
