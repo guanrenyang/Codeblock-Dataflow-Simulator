@@ -23,7 +23,7 @@ public:
            read_shared_spm(std::move(_read_shared_spm)), \
            write_shared_spm(std::move(_write_shared_spm)){}
 
-    void put(int pe_row_idx, int pe_col_idx, std::shared_ptr<RoutePackage> route_package);
+    void put(std::shared_ptr<RoutePackage> route_package);
     void execute_cycle();
 private:
     std::list<std::shared_ptr<RoutePackage>> route_packages;

@@ -126,7 +126,7 @@ void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memo
     // Put data on on-chip router
     VectorData src_data = reg[src_reg_idx].read_reg();
     std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, src_data, shared_from_this());
-    router->put(src_pe_row, src_pe_col, copy_data_package);
+    router->put(copy_data_package);
 
     // register the async instruction
     this->register_async_inst();

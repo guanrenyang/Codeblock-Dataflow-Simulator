@@ -2,7 +2,7 @@
 #include "RoutePackage.h"
 
 
-void Router::put(int pe_row_idx, int pe_col_idx, std::shared_ptr<RoutePackage> route_package){
+void Router::put(std::shared_ptr<RoutePackage> route_package){
     route_packages.push_back(route_package);
 };
 
