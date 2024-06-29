@@ -49,9 +49,11 @@ public:
 
 class StInst final: public Inst {
 public:
-    int src;
-    int addr;
-    StInst(int src, int addr) : src(src), addr(addr) {}
+    int src_pe_row;
+    int src_pe_col;
+    int src_reg_idx;
+    uint32_t addr;
+    StInst(int src_pe_row, int src_pe_col, int src_reg_idx, uint32_t addr) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), addr(addr) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
