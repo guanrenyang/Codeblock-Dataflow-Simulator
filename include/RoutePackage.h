@@ -26,25 +26,25 @@ class CopyDataPackage final : public RoutePackage {
 public:
     CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row, int dst_pe_col, int reg_idx, VectorData vector_data, std::shared_ptr<Inst> inst);
     void operate(std::shared_ptr<Router> router) ; 
-
+    
     int dst_pe_row_idx;
     int dst_pe_col_idx;
     int reg_idx;
     VectorData data;
 };
 
-class LoadSignalPackage: public RoutePackage {
+class LoadSignalPackage final : public RoutePackage {
     // Read SPM
 public:
     LoadSignalPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr, std::shared_ptr<Inst> inst);
-    void operate(std::shared_ptr<Router> router, std::shared_ptr<SPM>& memory) ; 
+    void operate(std::shared_ptr<Router> router) ; 
     int dst_pe_row_idx;
     int dst_pe_col_idx;
     int reg_idx;
     int spm_addr;
 };
 
-class LoadDataPackage: public RoutePackage {
+class LoadDataPackage final : public RoutePackage {
     // Write to reg
 public:
     LoadDataPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, VectorData dst_data, std::shared_ptr<Inst> inst);
@@ -55,11 +55,18 @@ public:
     VectorData data;
 };
 
-class StoreDataPackage: public RoutePackage {
-    // Write to SPM
+class StoreDataPackage final : public RoutePackage {
+    // Write to spm
+public:
+    StoreDataPackage(int src_pe_row, int src_pe_col, uint32_t addr, VectorData src_data, std::shared_ptr<Inst> inst);
+    void operate(std::shared_ptr<Router> router) ; 
+    uint32_t spm_addr;
+    VectorData data;
 };
 
-class StoreAckPackage: public RoutePackage {
-
+class StoreAckPackage final: public RoutePackage {
+public:
+    StoreAckPackage(std::shared_ptr<Inst> inst);
+    void operate(std::shared_ptr<Router> router) ;
 };
 #endif //DATAFLOW_SIMULATOR_ROUTEPACKAGE_H
