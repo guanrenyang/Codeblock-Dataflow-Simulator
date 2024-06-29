@@ -24,8 +24,8 @@ public:
         delete[] data;
     }
 
-    void read(int pe_row, int pe_col, int reg_idx, uint32_t addr, std::shared_ptr<Inst> inst, std::shared_ptr<Router> router);
-    void write(uint32_t addr, VectorData src);
+    VectorData read(uint32_t addr);
+    void write(uint32_t addr, VectorData data);
 
 };
 #endif
