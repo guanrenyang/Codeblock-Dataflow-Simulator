@@ -43,7 +43,6 @@ void LoadSignalPackage::operate(std::shared_ptr<Router> router) {
     VectorData res =  router->read_shared_spm(this->spm_addr);
     std::shared_ptr<RoutePackage> load_data_package = std::make_shared<LoadDataPackage>(this->dst_pe_row_idx, this->dst_pe_col_idx, this->reg_idx, res, inst);
     router->put(load_data_package);
-    inst->register_async_inst();
 } 
 
 LoadDataPackage::LoadDataPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, VectorData dst_data, std::shared_ptr<Inst> inst) : RoutePackage(inst) {
