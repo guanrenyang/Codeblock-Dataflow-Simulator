@@ -43,7 +43,7 @@ public:
     int dst_pe_col;
     int dst_reg_idx;
     int addr;
-    LdInst(int dst_pe_row, int dst_pe_col, int dst_reg_idx, int dst, uint32_t addr) : dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), addr(addr) {}
+    LdInst(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr) : dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), addr(addr) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 

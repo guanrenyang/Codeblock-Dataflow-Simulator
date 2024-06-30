@@ -22,7 +22,7 @@ void SPM::write(uint32_t addr, VectorData src) {
         std::cout << "SPM write out of size!";
         abort();
     }
-
+    
     for (int i = 0; i < 128; i++) {
         data[addr + i] = src[i];
     }

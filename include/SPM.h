@@ -17,8 +17,10 @@ public:
         this->size = size;
         
         // Initialize some data for testing.
-        for (int i = 0; i < 128; i++) 
-            data[i] = i;
+        float* float_data = reinterpret_cast<float*>(data);
+        for (int i = 0; i < 32; i++) {
+            float_data[i] = static_cast<float>(i) + 5.0f;
+        }
     }
     ~SPM(){
         delete[] data;
