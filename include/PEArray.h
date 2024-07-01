@@ -36,8 +36,8 @@ public:
         spm = std::make_shared<SPM>(_memory_size);
         router = std::make_shared<Router>(
                 [this](int pe_row, int pe_col, int reg_idx, VectorData new_data){this->write_pe_reg(pe_row, pe_col, reg_idx, new_data);},
-                [this](uint32_t addr){return this->spm->read(addr);},
-                [this](uint32_t addr, VectorData new_data){this->spm->write(addr, new_data);}
+                [this](std::shared_ptr<LoadSignalPackage> package){this->read_to_pe(package);},
+                [this](std::shared_ptr<StoreDataPackage> package){this->write_spm(package);}
         );
 
         // attach memory to each PE
@@ -69,6 +69,19 @@ public:
 
     void write_pe_reg(int pe_row, int pe_col, int reg_idx, const VectorData& new_data){
         (*reg_array_2d[pe_row][pe_col])[reg_idx].write_reg(new_data);
+    }
+
+    void read_to_pe(std::shared_ptr<LoadSignalPackage> package) {
+        VectorData res = this->spm->read(package->spm_addr);
+        std::shared_ptr<RoutePackage> load_data_package = std::make_shared<LoadDataPackage>(package->dst_pe_row_idx, package->dst_pe_col_idx, package->reg_idx, res, package->inst);
+        load_data_package->remaining_hops += this->spm->getDelay();
+        this->router->put(load_data_package);
+    }
+
+    void write_spm(std::shared_ptr<StoreDataPackage> package) {
+        package->remaining_hops += this->spm->getDelay();
+        std::shared_ptr<RoutePackage> store_ack_signal = std::make_shared<StoreAckPackage>(package->inst);
+        this->router->put(store_ack_signal);
     }
 
     void display_reg(int pe_row, int pe_col, int reg_idx){

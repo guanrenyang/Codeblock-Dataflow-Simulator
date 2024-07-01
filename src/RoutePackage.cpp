@@ -40,9 +40,10 @@ LoadSignalPackage::LoadSignalPackage(int dst_pe_row, int dst_pe_col, int dst_reg
 }
 
 void LoadSignalPackage::operate(std::shared_ptr<Router> router) {
-    VectorData res =  router->read_shared_spm(this->spm_addr);
-    std::shared_ptr<RoutePackage> load_data_package = std::make_shared<LoadDataPackage>(this->dst_pe_row_idx, this->dst_pe_col_idx, this->reg_idx, res, inst);
-    router->put(load_data_package);
+    //VectorData res =  router->read_shared_spm(this->spm_addr);
+    //std::shared_ptr<RoutePackage> load_data_package = std::make_shared<LoadDataPackage>(this->dst_pe_row_idx, this->dst_pe_col_idx, this->reg_idx, res, inst);
+    //router->put(load_data_package);
+    router->read_shared_spm(shared_from_this());
 } 
 
 LoadDataPackage::LoadDataPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, VectorData dst_data, std::shared_ptr<Inst> inst) : RoutePackage(inst) {
@@ -62,19 +63,21 @@ void LoadDataPackage::operate(std::shared_ptr<Router> router) {
 StoreDataPackage::StoreDataPackage(int src_pe_row, int src_pe_col, uint32_t addr, VectorData src_data, std::shared_ptr<Inst> inst) : RoutePackage(inst){
     this->spm_addr = addr;
     this->data = src_data;
-    this->remaining_hops = std::abs(0 - src_pe_row) + std::abs(0 - src_pe_col) + 1;
+    this->pe_row = src_pe_row;
+    this->pe_col = src_pe_col;
+    this->remaining_hops = std::abs(0 - pe_row) + std::abs(0 - pe_col) + 1;
 }
 
 void StoreDataPackage::operate(std::shared_ptr<Router> router) {
-    router->write_shared_spm(this->spm_addr, this->data);
-    std::shared_ptr<RoutePackage> store_ack_signal = std::make_shared<StoreAckPackage>(inst);
-    router->put(store_ack_signal);
+    router->write_shared_spm(shared_from_this());
 }
 
 
-StoreAckPackage::StoreAckPackage(std::shared_ptr<Inst> inst): RoutePackage(inst) {
+StoreAckPackage::StoreAckPackage(std::shared_ptr<Inst> inst, int src_pe_row, int src_pe_col): RoutePackage(inst) {
     this->inst = inst;
-    this->remaining_hops = 0;
+    this->pe_row = src_pe_row;
+    this->pe_col = src_pe_col;
+    this->remaining_hops = std::abs(0 - pe_row) + std::abs(0 - pe_col) + 1;
 }
 
 

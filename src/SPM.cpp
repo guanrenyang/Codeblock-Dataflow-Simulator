@@ -1,5 +1,6 @@
 #include "SPM.h"
 #include "common.h"
+#include "RoutePackage.h"
 
 VectorData SPM::read(uint32_t addr) {
     uint32_t end_addr = addr + sizeof(VectorData);
@@ -26,4 +27,8 @@ void SPM::write(uint32_t addr, VectorData src) {
     for (int i = 0; i < 128; i++) {
         data[addr + i] = src[i];
     }
+}
+
+int SPM::getDelay() {
+    return this->delay;
 }

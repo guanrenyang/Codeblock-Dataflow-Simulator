@@ -33,7 +33,7 @@ public:
     VectorData data;
 };
 
-class LoadSignalPackage final : public RoutePackage {
+class LoadSignalPackage final : public RoutePackage, public std::enable_shared_from_this<LoadSignalPackage> {
     // Read SPM
 public:
     LoadSignalPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr, std::shared_ptr<Inst> inst);
@@ -55,18 +55,20 @@ public:
     VectorData data;
 };
 
-class StoreDataPackage final : public RoutePackage {
+class StoreDataPackage final : public RoutePackage, public std::enable_shared_from_this<StoreDataPackage>{
     // Write to spm
 public:
     StoreDataPackage(int src_pe_row, int src_pe_col, uint32_t addr, VectorData src_data, std::shared_ptr<Inst> inst);
-    void operate(std::shared_ptr<Router> router) ; 
+    void operate(std::shared_ptr<Router> router); 
+    int pe_row, pe_col;
     uint32_t spm_addr;
     VectorData data;
 };
 
 class StoreAckPackage final: public RoutePackage {
 public:
-    StoreAckPackage(std::shared_ptr<Inst> inst);
+    int pe_row, pe_col;
+    StoreAckPackage(std::shared_ptr<Inst> inst, int src_pe_row, int src_pe_col);
     void operate(std::shared_ptr<Router> router) ;
 };
 #endif //DATAFLOW_SIMULATOR_ROUTEPACKAGE_H

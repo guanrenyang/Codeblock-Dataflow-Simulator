@@ -14,12 +14,12 @@ class SPM;
 class Router : public std::enable_shared_from_this<Router>{
 public:
     std::function<void(int, int, int, VectorData)> write_pe_reg;
-    std::function<VectorData(uint32_t)> read_shared_spm;
-    std::function<void(uint32_t, VectorData)> write_shared_spm;
+    std::function<void(std::shared_ptr<LoadSignalPackage>)> read_shared_spm;
+    std::function<void(std::shared_ptr<StoreDataPackage>)> write_shared_spm;
 
     Router(std::function<void(int, int, int, VectorData)> _write_pe_reg, \
-           std::function<VectorData(uint32_t)> _read_shared_spm, \
-           std::function<void(uint32_t, VectorData)> _write_shared_spm) : \
+           std::function<void(std::shared_ptr<LoadSignalPackage>)> _read_shared_spm, \
+           std::function<void(std::shared_ptr<StoreDataPackage>)> _write_shared_spm) : \
            write_pe_reg(std::move(_write_pe_reg)), \
            read_shared_spm(std::move(_read_shared_spm)), \
            write_shared_spm(std::move(_write_shared_spm)){}
