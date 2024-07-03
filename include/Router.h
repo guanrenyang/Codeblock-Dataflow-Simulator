@@ -7,6 +7,7 @@
 #include <memory>
 #include <utility>
 #include "Inst.h"
+#include "RoutePackage.h"
 class PEArray;
 class RoutePackage;
 class SPM;

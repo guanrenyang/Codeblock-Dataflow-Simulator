@@ -56,7 +56,7 @@ LoadDataPackage::LoadDataPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx
 }
 
 void LoadDataPackage::operate(std::shared_ptr<Router> router) {
-    router->write_pe_reg(this->dst_pe_row_idx, this->dst_pe_col_idx, this->reg_idx, this->data);
+    router->write_pe_reg(this->dst_pe_row_idx, this->dst_pe_col_idx, this->reg_idx, this->data);   
     this->inst->remove_async_inst();
 }
 

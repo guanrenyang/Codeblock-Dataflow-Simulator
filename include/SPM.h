@@ -20,7 +20,7 @@ public:
         
         // Initialize some data for testing.
         float* float_data = reinterpret_cast<float*>(data);
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < 1024; i++) {
             float_data[i] = static_cast<float>(i) + 5.0f;
         }
     }
