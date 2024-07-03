@@ -45,7 +45,7 @@ int main() {
       pe_array.display_spm(128);
       std::cout << std::endl;
 
-  int cycles = 20;
+  int cycles = 30;
   for (int i = 1; i <= cycles; i++) {
       // PE performs execution at the cycle,
       pe_array.execute_cycle();
@@ -63,10 +63,12 @@ int main() {
       // TODO: add a CodeBlock Manager to manage all the CodeBlocks scattered on the chip
       // update the constraints of each code block
       code_block_0->signal_downstream();
-      //code_block_1->signal_downstream();
+      // code_block_1->signal_downstream();
 
       code_block_0->update_constraint();
       code_block_1->update_constraint();
+
+      std::cout<< "Code Block 0 state: " << code_block_0->empty() << std::endl;
   }
   // pe.display_reg_as_fp32(0);
   // pe.display_reg_as_fp32(1);

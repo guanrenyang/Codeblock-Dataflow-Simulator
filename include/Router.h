@@ -3,14 +3,13 @@
 
 #include "VectorRegister.h"
 #include "common.h"
-#include <list>
-#include <memory>
-#include <utility>
-#include "Inst.h"
-#include "RoutePackage.h"
+
 class PEArray;
 class RoutePackage;
 class SPM;
+class Inst;
+class LoadSignalPackage;
+class StoreDataPackage;
 
 class Router : public std::enable_shared_from_this<Router>{
 public:
@@ -26,9 +25,11 @@ public:
            write_shared_spm(std::move(_write_shared_spm)){}
 
     void put(std::shared_ptr<RoutePackage> route_package);
+    void issue_buffered_route_packages();
     void execute_cycle();
 private:
     std::list<std::shared_ptr<RoutePackage>> route_packages;
+    std::list<std::shared_ptr<RoutePackage>> buffered_route_packages;
     // function pointer to PEArray::write_pe_reg
 };
 #endif //ROUTER_H

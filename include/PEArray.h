@@ -51,6 +51,7 @@ public:
     }
 
     void execute_cycle(){
+        // execute router
         for (int i = 0; i < num_row; i++) {
             for (int j = 0; j < num_col; j++) {
                 PE_array_2d[i][j].execute_cycle();
@@ -59,6 +60,7 @@ public:
 
         // execute router
         router->execute_cycle();
+        router->issue_buffered_route_packages(); // must be called when all the `router->put()`s have been called
     }
 
     void add_CodeBlock(int pe_row, int pe_col, std::shared_ptr<CodeBlock> code_block){
@@ -74,14 +76,14 @@ public:
     void read_to_pe(std::shared_ptr<LoadSignalPackage> package) {
         VectorData res = this->spm->read(package->spm_addr);
         std::shared_ptr<RoutePackage> load_data_package = std::make_shared<LoadDataPackage>(package->dst_pe_row_idx, package->dst_pe_col_idx, package->reg_idx, res, package->inst);
-        load_data_package->remaining_hops += this->spm->getDelay();
+        load_data_package->remaining_hops += this->spm->getDelay(); // [temporary] hack into LoadDataPackage to simulate SPM delay
         this->router->put(load_data_package);
     }
 
     void write_spm(std::shared_ptr<StoreDataPackage> package) {
         std::shared_ptr<RoutePackage> store_ack_signal = std::make_shared<StoreAckPackage>(package->inst, package->pe_row, package->pe_col);
         this->spm->write(package->spm_addr, package->data);
-        store_ack_signal->remaining_hops += this->spm->getDelay();
+        store_ack_signal->remaining_hops += this->spm->getDelay(); // [temporary] hack into StoreAckPackage to simulate SPM delay
         this->router->put(store_ack_signal);
     }
 

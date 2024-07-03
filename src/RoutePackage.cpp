@@ -81,7 +81,6 @@ StoreAckPackage::StoreAckPackage(std::shared_ptr<Inst> inst, int src_pe_row, int
 }
 
 
-void StoreAckPackage::operate(std::shared_ptr<Router> router)
-{
+void StoreAckPackage::operate(std::shared_ptr<Router> router) {
     this->inst->remove_async_inst();
 }

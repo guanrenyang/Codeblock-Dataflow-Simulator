@@ -4,3 +4,4 @@ cmake-build-relase/
 build/
 .vscode/
 .cache/
+CMakePresets.json

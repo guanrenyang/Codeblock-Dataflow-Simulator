@@ -1,5 +1,4 @@
 #include "SPM.h"
-#include "common.h"
 #include "RoutePackage.h"
 
 VectorData SPM::read(uint32_t addr) {
