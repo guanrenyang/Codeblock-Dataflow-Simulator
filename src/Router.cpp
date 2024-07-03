@@ -2,9 +2,13 @@
 #include "RoutePackage.h"
 
 
-void Router::put(int pe_row_idx, int pe_col_idx, std::shared_ptr<RoutePackage> route_package){
-    route_packages.push_back(route_package);
+void Router::put(std::shared_ptr<RoutePackage> route_package){
+    buffered_route_packages.push_back(route_package);
 };
+
+void Router::issue_buffered_route_packages() {
+    route_packages.splice(route_packages.end(), buffered_route_packages);
+}
 
 void Router::execute_cycle() {
     // traverse the set

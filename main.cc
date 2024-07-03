@@ -38,7 +38,7 @@ int main() {
       code_block_0->signal_downstream();
       code_block_1->signal_downstream();
 
-      // code_block_0->update_constraint();
+      code_block_0->update_constraint();
       code_block_1->update_constraint();
 
   }
