@@ -21,8 +21,16 @@ public:
     }
 
     void execute_cycle() {
-        auto inst = scheduler->getReadyInstruction();
-        inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        if (current_inst == nullptr) {
+            current_inst = scheduler->getReadyInstruction();
+            current_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        } else if (current_inst->is_finished()) {
+            current_inst->signal_downstream_if_finished(); // a completed instruction releases its downstream instructions
+
+            current_inst = scheduler->getReadyInstruction();
+            /* execute performs the actual operation of the instruction in one cycle (it is not execute_cycle) */
+            current_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        }
     }; // perform the operations in the current cycle
 
     void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {
@@ -72,6 +80,7 @@ private:
     //     }
     // };
 
+    std::shared_ptr<Inst> current_inst;
     std::shared_ptr<LocalScheduler> scheduler;
 
     /* Hardware resources */

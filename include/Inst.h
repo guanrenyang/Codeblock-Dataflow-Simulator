@@ -13,6 +13,16 @@ typedef std::vector<VectorRegister> VectorRegisterFile;
 class Inst : public std::enable_shared_from_this<Inst>{
 protected:
     std::shared_ptr<CodeBlock> code_block;
+
+    /* Instruction-level dependency */
+    bool finished = false;
+    int constraint_cnt;
+    int constraint_delta;
+    std::list<std::shared_ptr<Inst>> to_signal;
+    void add_constraint(){
+        constraint_cnt++;
+    }
+
 public:
     Inst() {}
     virtual ~Inst() {}
@@ -23,7 +33,15 @@ public:
     }
 
     void register_async_inst();
-    void remove_async_inst(); 
+    void remove_async_inst();
+
+    /* For sync instruction, all its cycles are finished
+     * For async instruction, it gets the ack */
+    bool is_finished();
+    bool ready(); // Check if the instruction is ready to be executed
+    void connect_to(const std::shared_ptr<Inst>& inst);
+    void signal_downstream_if_finished();
+    void update_constraint();
 };
 
 class CalInst final : public Inst {
@@ -69,7 +87,9 @@ public:
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 class NopInst final: public Inst {
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {};
+    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+        finished = true;
+    };
 };
 
 #endif

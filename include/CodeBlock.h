@@ -20,7 +20,7 @@ public:
     }
 
     /* CodeBlock states */
-    bool empty() { // Non-empty codeblock can't be released by PE
+    bool is_finished() { // Non-empty codeblock can't be released by PE
         return inst_stream.empty() && waiting_async_inst.empty();
     }
 
@@ -44,7 +44,6 @@ public:
         if (inst_stream.empty())
             return_inst  = std::make_shared<NopInst>();
         else {
-            // TODO: make inst_stream a queue
             return_inst = inst_stream.front();
             inst_stream.pop();
         }
@@ -52,8 +51,8 @@ public:
         return return_inst;
     }
 
-    void signal_downstream() {
-        if (empty()) {
+    void signal_downstream_if_finished() {
+        if (is_finished()) {
             for (const auto& cb : to_signal) {
                 cb->constraint_delta++;
             }

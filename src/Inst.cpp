@@ -95,11 +95,18 @@ static void gt_vv(VectorData& dst, const VectorData& src0, const VectorData& src
 }
 
 void Inst::register_async_inst() {
+#ifdef DEBUG
+    std::cout << "Registering async inst\n" << std::endl;
+#endif
     code_block->add_async_inst(shared_from_this());
 }
 
 void Inst::remove_async_inst() {
+#ifdef DEBUG
+    std::cout << "Remove async inst" << std::endl;
+#endif
     code_block->remove_async_inst(shared_from_this());
+    finished = true;
 }
 
 void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
@@ -120,6 +127,7 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
     }
 
     reg[dst].write_reg(dst_data);
+    finished = true;
 };
 
 void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
@@ -145,4 +153,28 @@ void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory
     this->register_async_inst();
 };
 
+bool Inst::is_finished() {
+    return finished;
+}
 
+bool Inst::ready() {
+    return constraint_cnt==0;
+}
+
+void Inst::connect_to(const std::shared_ptr<Inst>& inst) {
+    to_signal.push_back(inst);
+    inst->add_constraint();
+}
+
+void Inst::signal_downstream_if_finished() {
+    if (is_finished()) {
+        for (const auto& inst : to_signal) {
+            inst->constraint_delta++;
+        }
+    }
+}
+
+void Inst::update_constraint() {
+    constraint_cnt -= constraint_delta;
+    constraint_delta = 0;
+}
