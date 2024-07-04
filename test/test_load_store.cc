@@ -4,6 +4,7 @@
 
 int main() {
     std::list<std::shared_ptr<Inst>> inst_list;
+    std::list<std::shared_ptr<CodeBlock>> code_block_list;
 
 // TODO: add a CodeBlockBuilder to manage all the CodeBlocks, instructions and dependencies among them
   //cal inst: opcode, dst, src0, src1
@@ -32,7 +33,9 @@ int main() {
     test_inst_load->connect_to(test_inst_load_2);
 
   std::shared_ptr<CodeBlock> code_block_0 = std::make_shared<CodeBlock>();
+  code_block_list.push_back(code_block_0);
   std::shared_ptr<CodeBlock> code_block_1 = std::make_shared<CodeBlock>();
+  code_block_list.push_back(code_block_1);
 
   code_block_0->append_instruction(test_inst_add);
   //code_block_0->append_instruction(test_inst_load);
@@ -82,9 +85,15 @@ int main() {
       // code_block_0->signal_downstream_if_finished();
       // code_block_1->signal_downstream_if_finished();
 
-      code_block_0->update_constraint();
-      code_block_1->update_constraint();
-
+      for (const auto& code_block: code_block_list) {
+          code_block->signal_downstream_if_finished();
+      }
+      for (const auto& code_block: code_block_list) {
+          code_block->update_constraint();
+      }
+      for (const auto& inst : inst_list) {
+          inst->signal_downstream_if_finished();
+      }
       for (const auto& inst : inst_list) {
           inst->update_constraint();
       }

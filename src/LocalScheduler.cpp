@@ -31,7 +31,6 @@ std::shared_ptr<Inst> LocalScheduler::getReadyInstruction() {
      * cycle 2: the pe01 get an instruction from its code block.
      */
     if (current_CodeBlock != nullptr && current_CodeBlock->is_finished()) {
-        current_CodeBlock->signal_downstream_if_finished();
         current_CodeBlock = nullptr;
     }
     if (current_CodeBlock == nullptr) { // get next ready CodeBlock

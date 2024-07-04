@@ -21,12 +21,12 @@ public:
     }
 
     void execute_cycle() {
+        /* TODO: move the management of state of instructions to the scheduler instead of inside PE
+         * This implementation of current_inst management has a bug that the PE will not release the async instructions */
         if (current_inst == nullptr) {
             current_inst = scheduler->getReadyInstruction();
             current_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         } else if (current_inst->is_finished()) {
-            current_inst->signal_downstream_if_finished(); // a completed instruction releases its downstream instructions
-
             current_inst = scheduler->getReadyInstruction();
             /* execute performs the actual operation of the instruction in one cycle (it is not execute_cycle) */
             current_inst->execute(*accessable_reg, accessable_memory, accessable_router);
