@@ -24,7 +24,17 @@ void LocalScheduler:: addCodeBlock(std::shared_ptr<CodeBlock> code_block) {
 std::shared_ptr<Inst> LocalScheduler::getReadyInstruction() {
     check_waiting();
 
-    if(current_CodeBlock == nullptr || current_CodeBlock->empty()) { // get next ready CodeBlock
+    /* TODO: Fix the following issue by eager signaling instead of lazy signaling
+     * for now, if the last instruction of a CodeBlock on pe00 is an async block, the pe01 will be idle for an additional cycle
+     * cycle 0: async instruction of pe00 is finished, at the same time the code block is finished
+     * cycle 1: the pe00 senses that the current_CodeBlock is finished and signals the downstream, at the end of cycle1 the codeblock on pe01 is release
+     * cycle 2: the pe01 get an instruction from its code block.
+     */
+    if (current_CodeBlock != nullptr && current_CodeBlock->is_finished()) {
+        current_CodeBlock->signal_downstream_if_finished();
+        current_CodeBlock = nullptr;
+    }
+    if (current_CodeBlock == nullptr) { // get next ready CodeBlock
         if(ready_CodeBlocks.empty()) {
             return std::make_shared<NopInst>();
         }
@@ -33,10 +43,6 @@ std::shared_ptr<Inst> LocalScheduler::getReadyInstruction() {
     }
 
     auto inst = current_CodeBlock->popInstruction(); // The instruction must be valid becasuse of the check above
-
-    // TODO: call the wait method of the instruction to add it to the waiting set
-            
-    // TODO: if inst_stream is empty then return a NopInst
 
     return inst;
 };

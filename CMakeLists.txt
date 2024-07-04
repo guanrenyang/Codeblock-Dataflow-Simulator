@@ -4,6 +4,10 @@ project(Dataflow-Simulator)
 
 set(CMAKE_CXX_STANDARD 14)
 
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions(-DDEBUG=1)
+endif()
+
 include_directories(include)
 
 file(GLOB SOURCES "src/*.cpp")

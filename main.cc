@@ -35,8 +35,8 @@ int main() {
 
       // TODO: add a CodeBlock Manager to manage all the CodeBlocks scattered on the chip
       // update the constraints of each code block
-      code_block_0->signal_downstream();
-      code_block_1->signal_downstream();
+      // code_block_0->signal_downstream_if_finished();
+      /// code_block_1->signal_downstream_if_finished();
 
       code_block_0->update_constraint();
       code_block_1->update_constraint();
