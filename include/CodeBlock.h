@@ -52,10 +52,14 @@ public:
     }
 
     void signal_downstream_if_finished() {
+        if (signaled)
+            return;
+
         if (is_finished()) {
             for (const auto& cb : to_signal) {
                 cb->constraint_delta++;
             }
+            signaled = true;
         }
     }
     
@@ -68,6 +72,7 @@ private:
     std::queue<std::shared_ptr<Inst>> inst_stream;
     std::list<std::shared_ptr<Inst>> waiting_async_inst;
 
+    bool signaled = false;
     /* Inter-CodeBlock constraints*/
     int constraint_cnt;
     int constraint_delta; // update at the entry of the next cycle

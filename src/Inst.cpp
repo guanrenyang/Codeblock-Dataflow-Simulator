@@ -167,10 +167,14 @@ void Inst::connect_to(const std::shared_ptr<Inst>& inst) {
 }
 
 void Inst::signal_downstream_if_finished() {
+    if (signaled)
+        return;
+
     if (is_finished()) {
         for (const auto& inst : to_signal) {
             inst->constraint_delta++;
         }
+        signaled = true;
     }
 }
 

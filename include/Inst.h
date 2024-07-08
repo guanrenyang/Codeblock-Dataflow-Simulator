@@ -16,6 +16,8 @@ protected:
 
     /* Instruction-level dependency */
     bool finished = false;
+    bool signaled = false;
+
     int constraint_cnt;
     int constraint_delta;
     std::list<std::shared_ptr<Inst>> to_signal;
