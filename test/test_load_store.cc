@@ -13,13 +13,13 @@ int main() {
 
   //load: row, col, idx, addr
   //copy: src_row, src_col, dst_row, dst_col, src_reg, dst_reg
-  std::shared_ptr<Inst> test_copy = std::make_shared<CopyInst>(0, 0, 2, 0, 1, 0);
-    inst_list.push_back(test_copy);
-    test_inst_add->connect_to(test_copy);
+  // std::shared_ptr<Inst> test_copy = std::make_shared<CopyInst>(0, 0, 2, 0, 1, 0);
+    // inst_list.push_back(test_copy);
+    // test_inst_add->connect_to(test_copy);
 
   std::shared_ptr<Inst> test_inst_store = std::make_shared<StInst>(0, 0, 0, 0);
     inst_list.push_back(test_inst_store);
-    test_copy->connect_to(test_inst_store);
+    test_inst_add->connect_to(test_inst_store);
 
   std::shared_ptr<Inst> test_inst_store_2 = std::make_shared<StInst>(0, 0, 0, 128);
     inst_list.push_back(test_inst_store_2);

@@ -21,16 +21,18 @@ public:
     }
 
     void execute_cycle() {
-        /* TODO: move the management of state of instructions to the scheduler instead of inside PE
+        /* COMPLETED: move the management of state of instructions to the scheduler instead of inside PE
          * This implementation of current_inst management has a bug that the PE will not release the async instructions */
-        if (current_inst == nullptr) {
+/*        if (current_inst == nullptr) {
             current_inst = scheduler->getReadyInstruction();
             current_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         } else if (current_inst->is_finished()) {
             current_inst = scheduler->getReadyInstruction();
-            /* execute performs the actual operation of the instruction in one cycle (it is not execute_cycle) */
+            *//* execute performs the actual operation of the instruction in one cycle (it is not execute_cycle) *//*
             current_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        }
+        }*/
+        auto inst = scheduler->getReadyInstruction();
+        inst->execute(*accessable_reg, accessable_memory, accessable_router);
     }; // perform the operations in the current cycle
 
     void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {
@@ -68,18 +70,6 @@ public:
         }
     }
 private:
-    // class RouterFunctor {
-    // private:
-    //     std::shared_ptr<Router> accessable_router;
-    // public:
-    //     RouterFunctor(int pe_row, int pe_col, std::shared_ptr<Router> router) : src_pe_row(pe_row), src_pe_col(pe_col), accessable_router(std::move(router)) {}
-    //     int src_pe_row;
-    //     int src_pe_col;
-    //     void operator()(std::shared_ptr<RoutePackage> route_package) {
-    //         accessable_router->put(src_pe_row, src_pe_col, route_package);
-    //     }
-    // };
-
     std::shared_ptr<Inst> current_inst;
     std::shared_ptr<LocalScheduler> scheduler;
 

@@ -37,16 +37,17 @@ public:
     void remove_async_inst(std::shared_ptr<Inst> inst_ptr) { // called when the async instruction is done
         waiting_async_inst.remove(inst_ptr);
     }
-    
-    std::shared_ptr<Inst> popInstruction() {
-        std::shared_ptr<Inst> return_inst;
 
-        if (inst_stream.empty())
-            return_inst  = std::make_shared<NopInst>();
-        else {
-            return_inst = inst_stream.front();
-            inst_stream.pop();
-        }
+    /* instruction valideness management */
+    bool has_valid_instruction() {
+        return (!inst_stream.empty()) && (inst_stream.front()->ready());
+    }
+
+    std::shared_ptr<Inst> popInstruction() {
+        assert(has_valid_instruction());
+
+        std::shared_ptr<Inst> return_inst = inst_stream.front();
+        inst_stream.pop();
 
         return return_inst;
     }
