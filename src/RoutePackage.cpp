@@ -23,11 +23,17 @@ CopyDataPackage::CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row,
     this->reg_idx = reg_idx;
     this->data = vector_data;
     this->remaining_hops = std::abs(src_pe_row - dst_pe_row) + std::abs(src_pe_col - dst_pe_col);
+#ifdef DEBUG
+    std::cout << "CopyDataPackage create: " << src_pe_row << " " << src_pe_col << " to " << dst_pe_row << " " << dst_pe_col << " " << reg_idx << std::endl;
+#endif
 }
 
 void CopyDataPackage::operate(std::shared_ptr<Router> router) {
-    router->write_pe_reg(dst_pe_row_idx, dst_pe_col_idx, 0, data);
+    router->write_pe_reg(dst_pe_row_idx, dst_pe_col_idx, reg_idx, data);
     this->inst->remove_async_inst();
+#ifdef DEBUG
+    std::cout << "CopyDataPackage operate: " << dst_pe_row_idx << " " << dst_pe_col_idx << " " << reg_idx << std::endl;
+#endif
 } 
 
 LoadSignalPackage::LoadSignalPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr, std::shared_ptr<Inst> inst) : RoutePackage(inst) {
