@@ -9,6 +9,7 @@ void LocalScheduler:: addCodeBlock(std::shared_ptr<CodeBlock> code_block) {
     waiting_CodeBlocks.insert(code_block);
 };
 
+template<typename InstType>
 std::shared_ptr<Inst> LocalScheduler::getReadyInstruction() {
     check_waiting_CodeBlocks();
 
@@ -17,30 +18,18 @@ std::shared_ptr<Inst> LocalScheduler::getReadyInstruction() {
     }
 
     std::shared_ptr<Inst> return_inst = std::make_shared<NopInst>();
-
-    for (auto iter = ready_CodeBlocks.begin(); iter != ready_CodeBlocks.end(); iter++) {
-        if ((*iter)->has_valid_instruction()) {
-            return_inst = (*iter)->popInstruction();
+    for (auto & ready_CodeBlock : ready_CodeBlocks) {
+        if (ready_CodeBlock->has_valid_instruction()) {
+            auto front_inst = ready_CodeBlock->frontInstruction();
+            if (std::dynamic_pointer_cast<InstType>(front_inst) != nullptr) {
+                return_inst = ready_CodeBlock->popInstruction();
+                break;
+            }
             /* TODO: maybe problem -- CodeBlocks will be left in `ready_CodeBlocks` list when finished */
         }
     }
 
     return return_inst;
-
-/*    if (current_CodeBlock == nullptr || current_CodeBlock->is_finished()) { // get next ready CodeBlock
-        if(ready_CodeBlocks.empty()) {
-            return std::make_shared<NopInst>();
-        }
-        current_CodeBlock = ready_CodeBlocks.front();
-        ready_CodeBlocks.pop_front();
-    }
-
-    *//* we can't manage validness of instruction in CodeBlock
-     * Validness of instruction and codeblock are managed here
-     * *//*
-    auto inst = current_CodeBlock->popInstruction(); // The instruction must be valid becasuse of the check above
-
-    return inst;*/
 }
 
 void LocalScheduler::check_waiting_CodeBlocks() {
@@ -56,3 +45,9 @@ void LocalScheduler::check_waiting_CodeBlocks() {
         waiting_CodeBlocks.erase(cb);
     }
 }
+
+// explicit instantiation
+template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<LdInst>();
+template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<StInst>();
+template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<CalInst>();
+template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<CopyInst>();

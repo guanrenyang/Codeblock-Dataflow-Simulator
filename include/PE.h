@@ -21,18 +21,15 @@ public:
     }
 
     void execute_cycle() {
-        /* COMPLETED: move the management of state of instructions to the scheduler instead of inside PE
-         * This implementation of current_inst management has a bug that the PE will not release the async instructions */
-/*        if (current_inst == nullptr) {
-            current_inst = scheduler->getReadyInstruction();
-            current_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        } else if (current_inst->is_finished()) {
-            current_inst = scheduler->getReadyInstruction();
-            *//* execute performs the actual operation of the instruction in one cycle (it is not execute_cycle) *//*
-            current_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        }*/
-        auto inst = scheduler->getReadyInstruction();
-        inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        auto load_inst = scheduler->getReadyInstruction<LdInst>();
+        auto store_inst = scheduler->getReadyInstruction<StInst>();
+        auto cal_inst = scheduler->getReadyInstruction<CalInst>();
+        auto copy_inst = scheduler->getReadyInstruction<CopyInst>();
+
+        load_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        store_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        cal_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        copy_inst->execute(*accessable_reg, accessable_memory, accessable_router);
     }; // perform the operations in the current cycle
 
     void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {

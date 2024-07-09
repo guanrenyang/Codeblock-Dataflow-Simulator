@@ -10,6 +10,8 @@ class Inst;
 class LocalScheduler {
 public:
     void addCodeBlock(std::shared_ptr<CodeBlock> code_block);
+
+    template<typename InstType>
     std::shared_ptr<Inst> getReadyInstruction();
 private:
     std::shared_ptr<CodeBlock> current_CodeBlock;

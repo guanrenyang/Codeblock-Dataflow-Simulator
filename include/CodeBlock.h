@@ -52,6 +52,12 @@ public:
         return return_inst;
     }
 
+    std::shared_ptr<Inst> frontInstruction() {
+        assert(has_valid_instruction());
+
+        return inst_stream.front();
+    }
+
     void signal_downstream_if_finished() {
         if (signaled)
             return;

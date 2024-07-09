@@ -12,14 +12,14 @@ typedef std::vector<VectorRegister> VectorRegisterFile;
 
 class Inst : public std::enable_shared_from_this<Inst>{
 protected:
-    std::shared_ptr<CodeBlock> code_block;
+    std::shared_ptr<CodeBlock> code_block = nullptr;
 
     /* Instruction-level dependency */
     bool finished = false;
     bool signaled = false;
 
-    int constraint_cnt;
-    int constraint_delta;
+    int constraint_cnt = 0;
+    int constraint_delta = 0;
     std::list<std::shared_ptr<Inst>> to_signal;
     void add_constraint(){
         constraint_cnt++;

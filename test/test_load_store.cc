@@ -66,7 +66,7 @@ int main() {
   for (int i = 1; i <= cycles; i++) {
       // PE performs execution at the cycle,
 #ifdef DEBUG
-      std::cout << "\x1b[31mStart cycle " << i << "\x1b[0m" << std::endl;
+      std::cout << "----------Start cycle " << i << "----------" << std::endl;
 #endif
       pe_array.execute_cycle();
 
