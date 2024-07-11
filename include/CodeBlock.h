@@ -16,7 +16,11 @@ public:
 
     void append_instruction(const std::shared_ptr<Inst>& inst_ptr) {
         inst_ptr->register_code_block(shared_from_this());
-        inst_stream.push(inst_ptr);
+
+        if (!inst_stream.empty()) {
+            inst_stream.back()->connect_to(inst_ptr);
+        }
+        inst_stream.push_back(inst_ptr);
     }
 
     /* CodeBlock states */
@@ -47,7 +51,7 @@ public:
         assert(has_valid_instruction());
 
         std::shared_ptr<Inst> return_inst = inst_stream.front();
-        inst_stream.pop();
+        inst_stream.pop_front();
 
         return return_inst;
     }
@@ -76,7 +80,7 @@ public:
     }
 
 private:
-    std::queue<std::shared_ptr<Inst>> inst_stream;
+    std::list<std::shared_ptr<Inst>> inst_stream;
     std::list<std::shared_ptr<Inst>> waiting_async_inst;
 
     bool signaled = false;
