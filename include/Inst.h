@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+class PECoord;
 class Router;
 class SPM;
 class VectorRegister;
@@ -28,7 +29,7 @@ protected:
 public:
     Inst() {}
     virtual ~Inst() {}
-    virtual void execute(VectorRegisterFile& reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) = 0 ;
+    virtual void execute(PECoord pe_coord, VectorRegisterFile& reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) = 0 ;
 
     void register_code_block(std::shared_ptr<CodeBlock> code_block) { // A inst must be assgined to a codeblock
         this->code_block = code_block;
@@ -54,27 +55,23 @@ public:
     int src1;
     CalInst(int opcode, int dst, int src0, int src1) : opcode(opcode), dst(dst), src0(src0), src1(src1) {}
     ~CalInst() {}
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
+    void execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
 class LdInst final : public Inst {
 public:
-    int dst_pe_row;
-    int dst_pe_col;
     int dst_reg_idx;
     int addr;
-    LdInst(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr) : dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), addr(addr) {}
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
+    LdInst(int dst_reg_idx, uint32_t addr) : dst_reg_idx(dst_reg_idx), addr(addr) {}
+    void execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
 class StInst final: public Inst {
 public:
-    int src_pe_row;
-    int src_pe_col;
     int src_reg_idx;
     uint32_t addr;
-    StInst(int src_pe_row, int src_pe_col, int src_reg_idx, uint32_t addr) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), addr(addr) {}
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
+    StInst(int src_reg_idx, uint32_t addr) : src_reg_idx(src_reg_idx), addr(addr) {}
+    void execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
 class CopyInst final: public Inst {
@@ -86,12 +83,10 @@ public:
     int src_reg_idx;
     int dst_reg_idx;
     CopyInst(int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx) {}
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
+    void execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 class NopInst final: public Inst {
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-        finished = true;
-    };
+    void execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
 #endif

@@ -17,7 +17,7 @@ public:
         for (int i = 0; i < _num_row; ++i) {
             std::vector<PE> row;
             for (int j = 0; j < _num_col; ++j) {
-                row.emplace_back(PE());
+                row.emplace_back(PE({i, j}));
             }
             PE_array_2d.push_back(row);
         }

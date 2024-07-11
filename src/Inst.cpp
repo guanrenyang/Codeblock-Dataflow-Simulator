@@ -4,6 +4,7 @@
 #include "Router.h"
 #include "VectorRegister.h"
 #include "CodeBlock.h"
+#include "PE.h"
 
 template <typename T>
 static void add_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
@@ -109,7 +110,7 @@ void Inst::remove_async_inst() {
     finished = true;
 }
 
-void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+void CalInst::execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     // TODO: Add other instructions, for now it is vector add
     VectorData dst_data;
 
@@ -130,7 +131,7 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
     finished = true;
 };
 
-void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+void CopyInst::execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     // Put data on on-chip router
     VectorData src_data = reg[src_reg_idx].read_reg();
     std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, src_data, shared_from_this());
@@ -140,17 +141,21 @@ void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memo
     this->register_async_inst();
 };
 
-void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    std::shared_ptr<RoutePackage> load_signal_package = std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx, addr, shared_from_this());
+void LdInst::execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    std::shared_ptr<RoutePackage> load_signal_package = std::make_shared<LoadSignalPackage>(pe_coord.row, pe_coord.col, dst_reg_idx, addr, shared_from_this());
     router->put(load_signal_package);
     this->register_async_inst();
 };
 
-void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+void StInst::execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     VectorData store_data = reg[src_reg_idx].read_reg();
-    std::shared_ptr<RoutePackage> store_data_package = std::make_shared<StoreDataPackage>(src_pe_row, src_pe_col, addr, store_data, shared_from_this());
+    std::shared_ptr<RoutePackage> store_data_package = std::make_shared<StoreDataPackage>(pe_coord.row, pe_coord.col, addr, store_data, shared_from_this());
     router->put(store_data_package);
     this->register_async_inst();
+};
+
+void NopInst::execute(PECoord pe_coord, VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    finished = true;
 };
 
 bool Inst::is_finished() {

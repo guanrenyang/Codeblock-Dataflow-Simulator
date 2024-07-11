@@ -32,7 +32,7 @@ static int use_copy(){
 
     // codeblock 2
     std::shared_ptr<Inst> add_2 = std::make_shared<CalInst>(0, 0, 0, 1);
-    std::shared_ptr<Inst> store_2 = std::make_shared<StInst>(0, 1, 0,  256);
+    std::shared_ptr<Inst> store_2 = std::make_shared<StInst>(0,  256);
     code_block_2->append_instruction(add_2);
     code_block_2->append_instruction(store_2);
     inst_list.push_back(add_2);
@@ -112,7 +112,7 @@ static int use_ldst(){
 
     // code block 0
     std::shared_ptr<Inst> add_0 = std::make_shared<CalInst>(0, 0, 0, 1);
-    std::shared_ptr<Inst> store_0 = std::make_shared<StInst>(0, 0, 0, 0);
+    std::shared_ptr<Inst> store_0 = std::make_shared<StInst>(0, 0);
     code_block_0->append_instruction(add_0);
     code_block_0->append_instruction(store_0);
     inst_list.push_back(add_0);
@@ -121,7 +121,7 @@ static int use_ldst(){
 
     // code block 1
     std::shared_ptr<Inst> add_1 = std::make_shared<CalInst>(0, 2, 2, 3);
-    std::shared_ptr<Inst> store_1 = std::make_shared<StInst>(0, 0, 2,  128);
+    std::shared_ptr<Inst> store_1 = std::make_shared<StInst>(2,  128);
     code_block_1->append_instruction(add_1);
     code_block_1->append_instruction(store_1);
     inst_list.push_back(add_1);
@@ -129,10 +129,10 @@ static int use_ldst(){
     add_1->connect_to(store_1);
 
     // codeblock 2
-    std::shared_ptr<Inst> ld_2_0 = std::make_shared<LdInst>(0, 1, 0,  0);
-    std::shared_ptr<Inst> ld_2_1 = std::make_shared<LdInst>(0, 1, 1,  128);
+    std::shared_ptr<Inst> ld_2_0 = std::make_shared<LdInst>(0,  0);
+    std::shared_ptr<Inst> ld_2_1 = std::make_shared<LdInst>(1,  128);
     std::shared_ptr<Inst> add_2 = std::make_shared<CalInst>(0, 0, 0, 1);
-    std::shared_ptr<Inst> store_2 = std::make_shared<StInst>(0, 1, 0,  256);
+    std::shared_ptr<Inst> store_2 = std::make_shared<StInst>(0,  256);
     code_block_2->append_instruction(ld_2_0);
     code_block_2->append_instruction(ld_2_1);
     code_block_2->append_instruction(add_2);

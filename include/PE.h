@@ -10,9 +10,17 @@
 #include "SPM.h"
 #include <memory>
 #include <utility>
+
+struct PECoord {
+    int row;
+    int col;
+};
+
 class PE {
 public:
-    PE(std::shared_ptr<Router> router_ptr = nullptr, std::shared_ptr<VectorRegisterFile> reg_file = nullptr, std::shared_ptr<SPM> spm_ptr = nullptr)  {
+    PE(PECoord corrd, std::shared_ptr<Router> router_ptr = nullptr, std::shared_ptr<VectorRegisterFile> reg_file = nullptr, std::shared_ptr<SPM> spm_ptr = nullptr)  {
+        this->coord = corrd;
+
         scheduler = std::make_shared<LocalScheduler>();
 
         accessable_reg = std::move(reg_file);
@@ -26,10 +34,10 @@ public:
         auto cal_inst = scheduler->getReadyInstruction<CalInst>();
         auto copy_inst = scheduler->getReadyInstruction<CopyInst>();
 
-        load_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        store_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        cal_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        copy_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        load_inst->execute(coord, *accessable_reg, accessable_memory, accessable_router);
+        store_inst->execute(coord, *accessable_reg, accessable_memory, accessable_router);
+        cal_inst->execute(coord, *accessable_reg, accessable_memory, accessable_router);
+        copy_inst->execute(coord, *accessable_reg, accessable_memory, accessable_router);
     }; // perform the operations in the current cycle
 
     void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {
@@ -67,6 +75,8 @@ public:
         }
     }
 private:
+    PECoord coord;
+
     std::shared_ptr<Inst> current_inst;
     std::shared_ptr<LocalScheduler> scheduler;
 
