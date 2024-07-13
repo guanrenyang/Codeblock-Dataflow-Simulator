@@ -1,51 +1,27 @@
-#include "Inst.h"
-#include "include/PEArray.h"
-#include <memory>
+#include "PEArray.h"
+#include "DataFlowGraph.h"
+
+int display(PEArray & pe_array, int cycle);
+
+std::shared_ptr<DataFlowGraph> vector_add(PEArray & pe_array);
 
 int main() {
-  // Front-end: Define a dataflow graph
-  std::shared_ptr<Inst> test_inst_0 = std::make_shared<CalInst>(0, 2, 0, 1);
-  std::shared_ptr<Inst> test_copy = std::make_shared<CopyInst>(0, 0, 2, 0, 1, 0);
-  std::shared_ptr<CodeBlock> code_block_0 = std::make_shared<CodeBlock>();
-  code_block_0->append_instruction(test_inst_0);
-  code_block_0->append_instruction(test_copy);  
+    PEArray pe_array(4, 4, 6*1024*1024);
 
-  std::shared_ptr<Inst> test_inst_1 = std::make_shared<CalInst>(0, 2, 0, 1);
-  std::shared_ptr<CodeBlock> code_block_1 = std::make_shared<CodeBlock>();
-  code_block_1->append_instruction(test_inst_1);
+    auto dfg = vector_add(pe_array);
 
-  code_block_0->connect_to(code_block_1);
+    display(pe_array, 0);
+    // TODO: make the main loop to exit when all the instructions are completed
+    int cycles = 2400;
+    for (int i = 1; i <= cycles; i++) {
+        // PE performs execution at the cycle,
+        std::cout << "----------Start cycle " << i << "----------" << std::endl;
 
-  // Back-end: PE excuting the dataflow graph
-  PEArray pe_array(4, 4, 6*1024*1024);
-  pe_array.add_CodeBlock(0, 0, code_block_0);
-  pe_array.add_CodeBlock(0, 1, code_block_1);
+        pe_array.execute_cycle();
 
-  int cycles = 4;
-  for (int i = 0; i < cycles; i++) {
-      // PE performs execution at the cycle,
-      pe_array.execute_cycle();
+        display(pe_array, i);
 
-      // show result
-      std::cout << "After cycle " << i << " :\n";
-      pe_array.display_reg(0, 0, 2);
-      pe_array.display_reg(0, 1, 0);
-      pe_array.display_reg(0, 1, 2);
-      std::cout << std::endl;
-
-      // TODO: add a CodeBlock Manager to manage all the CodeBlocks scattered on the chip
-      // update the constraints of each code block
-      // code_block_0->signal_downstream_if_finished();
-      /// code_block_1->signal_downstream_if_finished();
-
-      code_block_0->update_constraint();
-      code_block_1->update_constraint();
-
-  }
-  // pe.display_reg_as_fp32(0);
-  // pe.display_reg_as_fp32(1);
-  // pe.display_reg_as_fp32(2);
-  // pe.display_reg_as_fp32(3);
-  // pe.display_reg_as_fp32(4);
-  return 0;
+        dfg->signal_and_update();
+    }
+    return 0;
 }
