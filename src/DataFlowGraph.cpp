@@ -12,14 +12,21 @@ void DataFlowGraph::connectCodeBlock(std::shared_ptr<CodeBlock> src, std::shared
     src->connect_to(dst);
 }
 
+std::shared_ptr<CodeBlock> DataFlowGraph::createDependentCodeBlock(std::shared_ptr<CodeBlock> upstream_code_block) {
+    std::shared_ptr<CodeBlock> code_block = std::make_shared<CodeBlock>();
+    CodeBlock_list.push_back(code_block);
+    upstream_code_block->connect_to(code_block);
+    return code_block;
+}
+
 void DataFlowGraph::appendCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1) {
     std::shared_ptr<Inst> cal_inst = std::make_shared<CalInst>(opcode, dst, src0, src1);
     code_block->append_instruction(cal_inst);
     Inst_list.push_back(cal_inst);
 }
 
-void DataFlowGraph::appendLoad(std::shared_ptr<CodeBlock> code_block, int dst_pe_row, int dst_pe_col, int dst_reg_idx, int spm_addr) {
-    std::shared_ptr<Inst> ld_inst = std::make_shared<LdInst>(dst_pe_row, dst_pe_col, dst_reg_idx, spm_addr);
+void DataFlowGraph::appendLoad(std::shared_ptr<CodeBlock> code_block, int pe_row, int pe_col, int reg_idx, int spm_addr) {
+    std::shared_ptr<Inst> ld_inst = std::make_shared<LdInst>(pe_row, pe_col, reg_idx, spm_addr);
     code_block->append_instruction(ld_inst);
     Inst_list.push_back(ld_inst);
 }
