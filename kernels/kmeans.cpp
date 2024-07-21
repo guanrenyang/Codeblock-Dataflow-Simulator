@@ -2,6 +2,7 @@
 #include "PEArray.h"
 #include <memory>
 #include "Opcode.h"
+#include <cmath>
 
 #define points 2
 #define center1 0
@@ -24,6 +25,74 @@ const int NUM_IN_USE_REG_PER_PE = 1;
 
 const int RAW_DATA_BYTES = NUM_PE * NUM_IN_USE_REG_PER_PE * REG_WIDTH_IN_BYTES;
 
+float squared_distance(float a, float b) {
+    return abs(a - b);
+}
+
+// Function to perform K-means clustering on 1D data
+std::vector<float> kmeans_1d(int k = 2, int max_iterations = 1) {
+    std::vector<float> data(32*16);
+    int n = data.size();
+
+    for (int i = 0; i < 512; i++) {
+        data[i] = i;
+    }
+
+    // Step 1: Initialize k random centroids
+    std::vector<float> centroids(k);
+    centroids[0] = 1;
+    centroids[1] = 2;
+
+    // Step 2: Create clusters vector to hold the cluster assignments
+    std::vector<int> clusters(n);
+
+    // Step 3: Iteratively assign points to nearest centroid and update centroids
+    for (int iter = 0; iter < max_iterations; ++iter) {
+        // Clear clusters
+        for (int i = 0; i < n; ++i) {
+            clusters[i] = 0;
+        }
+
+        // Assign each point to nearest centroid
+        for (int i = 0; i < n; ++i) {
+            float min_dist = 1000.0;
+            int closest_centroid = 0;
+
+            // Find closest centroid
+            for (int j = 0; j < k; ++j) {
+                float dist = squared_distance(data[i], centroids[j]);
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    closest_centroid = j;
+                }
+            }
+
+            // Assign point to cluster
+            clusters[i] = closest_centroid;
+        }
+
+        // Update centroids
+        std::vector<float> new_centroids(k);
+        std::vector<int> cluster_count(k, 0);
+
+        for (int i = 0; i < n; ++i) {
+            new_centroids[clusters[i]] += data[i];
+            cluster_count[clusters[i]]++;
+        }
+        for (int j = 0; j < k; ++j) {
+            if (cluster_count[j] > 0) {
+                new_centroids[j] /= cluster_count[j];
+            }
+        }
+
+        // Update centroids
+        centroids = new_centroids;
+    }
+
+    return centroids;
+}
+
+
 int display(PEArray & pe_array, int cycle) {
     
     if (cycle != 0)
@@ -34,8 +103,20 @@ int display(PEArray & pe_array, int cycle) {
     std::cout << "RAW_DATA Registers:\n";
     for (int pe_row = 0; pe_row < 4; ++pe_row) {
         for (int pe_col = 0; pe_col < 4; ++pe_col) {
-            pe_array.display_reg(pe_row, pe_col, 0);
-            pe_array.display_reg(pe_row, pe_col, 1);
+            pe_array.display_reg(pe_row, pe_col, center1);
+            pe_array.display_reg(pe_row, pe_col, center2);
+            pe_array.display_reg(pe_row, pe_col, points);
+            pe_array.display_reg(pe_row, pe_col, dis1);
+            pe_array.display_reg(pe_row, pe_col, dis2);
+            pe_array.display_reg(pe_row, pe_col, mask1);
+            pe_array.display_reg(pe_row, pe_col, mask2);
+
+            
+            // pe_array.display_reg(pe_row, pe_col, dis1);
+            // pe_array.display_reg(pe_row, pe_col, mask1);
+            // pe_array.display_reg(pe_row, pe_col, dis2);
+            // pe_array.display_reg(pe_row, pe_col, mask2);
+            
         }
     }
 
@@ -48,7 +129,13 @@ int display(PEArray & pe_array, int cycle) {
     // pe_array.display_spm(256);
     // std::cout << std::endl;
 
-
+    std::vector<float> centroids = kmeans_1d(2, 1);
+        // Print centroids
+    std::cout << "Centroids:" << std::endl;
+    for (int i = 0; i < 2; ++i) {
+        std::cout << centroids[i] << " ";
+    }
+    std::cout << std::endl;
     return 0;
 }
 
@@ -116,13 +203,13 @@ std::shared_ptr<DataFlowGraph> kmeans(PEArray & pe_array){
     for (int pe_row = 0;pe_row < PE_ROWS;pe_row++) {
         for (int pe_col = 0; pe_col < PE_ROWS; pe_col++) {
             // load, first 2 spm addr is center addr
-            int spm_start_per_pe = (pe_idx(pe_row, pe_col) * NUM_IN_USE_REG_PER_PE + 2)* REG_WIDTH_IN_BYTES;
-            for (int reg_id = 0; reg_id < NUM_IN_USE_REG_PER_PE; reg_id++) {
-                int spm_offset = reg_id * REG_WIDTH_IN_BYTES;
-                dfg->appendLoad(load_and_cal[pe_idx(pe_row, pe_col)], pe_row, pe_col, 0, 0);
-                dfg->appendLoad(load_and_cal[pe_idx(pe_row, pe_col)], pe_row, pe_col, 1, REG_WIDTH_IN_BYTES);
-                dfg->appendLoad(load_and_cal[pe_idx(pe_row, pe_col)], pe_row, pe_col, reg_id + 2, spm_start_per_pe + spm_offset);
-            }
+            int spm_start_per_pe = (pe_idx(pe_row, pe_col) * NUM_IN_USE_REG_PER_PE + 2) * REG_WIDTH_IN_BYTES;
+
+            dfg->appendLoad(load_and_cal[pe_idx(pe_row, pe_col)], pe_row, pe_col, center1, 0);
+            dfg->appendLoad(load_and_cal[pe_idx(pe_row, pe_col)], pe_row, pe_col, center2, REG_WIDTH_IN_BYTES);
+            dfg->appendLoad(load_and_cal[pe_idx(pe_row, pe_col)], pe_row, pe_col, points, spm_start_per_pe);
+
+
             //sub to get the distance 1
             dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], Sub_vv, temp1, center1, points);
             dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], Sub_vv, temp2, points, center1);
@@ -147,8 +234,8 @@ std::shared_ptr<DataFlowGraph> kmeans(PEArray & pe_array){
             dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], Max_mask_vv, mask2, dis2, dis1);
 
             //get the valid distance of center1, center2
-            dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], Mul_vv, dis1, mask1, dis1);
-            dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], Mul_vv, dis2, mask2, dis2);
+            dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], Mul_vv, dis1, mask1, points);
+            dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], Mul_vv, dis2, mask2, points);
             //get sum
             dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], V_add, dis1, dis1, 0);
             dfg->appendCal(load_and_cal[pe_idx(pe_row, pe_col)], V_add, dis2, dis2, 0);
@@ -176,8 +263,8 @@ std::shared_ptr<DataFlowGraph> kmeans(PEArray & pe_array){
         dfg->appendCal(reduction, Add_vv, dis2, dis2, reg_id + 2);
         dfg->appendCal(reduction, Add_vv, mask2, mask2, reg_id + 3);
     }
-    dfg->appendCal(reduction, Div_vv, dis1, dis1, mask1);
-    dfg->appendCal(reduction, Div_vv, dis2, dis2, mask2);
+    dfg->appendCal(reduction, Div_vv, center1, dis1, mask1);
+    dfg->appendCal(reduction, Div_vv, center2, dis2, mask2);
 
     return dfg;
 }

@@ -4,6 +4,7 @@
 #include "Router.h"
 #include "VectorRegister.h"
 #include "CodeBlock.h"
+#include "common.h"
 
 template <typename T>
 static void add_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
@@ -36,6 +37,7 @@ static void mul_vv(VectorData& dst, const VectorData& src0, const VectorData& sr
     for (int i = 0; i < num_element; i++) {
         // Perform multiplication and truncate to T's range
         dst_ptr[i] = src0_ptr[i] * src1_ptr[i];
+        if (dst_ptr[i] < 0.001f) dst_ptr[i] = 0.0f;
     }
 }
 
@@ -100,13 +102,51 @@ static void v_add(VectorData& dst, const VectorData& src0, const VectorData& src
     int num_element = dst.size() / sizeof(T);
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     T* dst_ptr = reinterpret_cast<T*>(dst.data());
+    dst_ptr[0] = 0.0f;
     for (int i = 0; i < num_element; i++) {
         dst_ptr[0] += src0_ptr[i];
     }
+    if (dst_ptr[0] < 0.001f)    dst_ptr[0] = 0.0f;
     for (int i = 1; i < num_element; i++) {
         dst_ptr[i] = dst_ptr[0];
     }
 }
+
+template <typename T>
+static void abs_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
+    // src1 is discarded
+    int num_element = dst.size() / sizeof(T);
+    const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
+    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+    for (int i = 0; i < num_element; i++) {
+        dst_ptr[i] = abs(src0_ptr[i]);
+    }
+}
+
+template <typename T>
+static void max_mask_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
+    int num_element = dst.size() / sizeof(T);
+    const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
+    const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
+    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+    for (int i = 0; i < num_element; i++) {
+        dst_ptr[i] = src0_ptr[i] > src1_ptr[i] ? 1 : 0;
+    }
+}
+
+template <typename T>
+static void div_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
+    int num_element = dst.size() / sizeof(T);
+    const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
+    const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
+    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+    for (int i = 0; i < num_element; i++) {
+        // Perform multiplication and truncate to T's range
+        dst_ptr[i] = src0_ptr[i] / src1_ptr[i];
+        if (dst_ptr[i] < 0.001f) dst_ptr[i] = 0.0f;
+    }
+}
+
 
 void Inst::register_async_inst() {
 #ifdef DEBUG
@@ -139,6 +179,9 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
         case 6: lt_vv<float>(dst_data, src0_data, src1_data); break;
         case 7: gt_vv<float>(dst_data, src0_data, src1_data); break;
         case 8: v_add<float>(dst_data, src0_data, src1_data); break;
+        case 9: abs_vv<float>(dst_data, src0_data, src1_data); break;
+        case 10: max_mask_vv<float>(dst_data, src0_data, src1_data); break;
+        case 11: div_vv<float>(dst_data, src0_data, src1_data); break;
     }
 
     reg[dst].write_reg(dst_data);
