@@ -20,9 +20,15 @@ public:
         
         // Initialize some data for testing.
         float* float_data = reinterpret_cast<float*>(data);
-        for (int i = 0; i < 1024; i++) {
-            // float_data[i] = static_cast<float>(i) + 5.0f;
-            float_data[i] = 1.0f;
+        for (int i = 0; i < 32; i++) {
+            float_data[i] = static_cast<float>(1);
+        }
+        for (int i = 32; i < 64; i++) {
+            float_data[i] = static_cast<float>(2);
+        }
+        for (int i = 64; i < 1024; i++) {
+            float_data[i] = static_cast<float>(i) - 64.0f;
+            // float_data[i] = 1.0f;
         }
     }
     ~SPM(){
