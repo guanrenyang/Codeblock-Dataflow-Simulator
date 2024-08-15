@@ -22,6 +22,8 @@ public:
         signalDownstream();
         updateConstraint();
     }
+
+    bool is_finished();
 private:
     std::vector<std::shared_ptr<CodeBlock>> CodeBlock_list; // CodeBlock can be indexed by its subscript
     std::list<std::shared_ptr<Inst>> Inst_list;

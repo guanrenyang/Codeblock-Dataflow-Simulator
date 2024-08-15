@@ -11,17 +11,21 @@ int main() {
     auto dfg = vector_add(pe_array);
 
     display(pe_array, 0);
-    // TODO: make the main loop to exit when all the instructions are completed
-    int cycles = 2400;
-    for (int i = 1; i <= cycles; i++) {
+    int cycle_idx = 0;
+    while(!dfg->is_finished()) {
         // PE performs execution at the cycle,
-        std::cout << "----------Start cycle " << i << "----------" << std::endl;
+        std::cout << "----------Start cycle " << cycle_idx << "----------" << std::endl;
 
         pe_array.execute_cycle();
 
-        display(pe_array, i);
+        display(pe_array, cycle_idx);
 
         dfg->signal_and_update();
+
+        cycle_idx++;
     }
+
+    std::cout<<"Simulation finished after " <<cycle_idx << " cycles" <<std::endl;
+
     return 0;
 }

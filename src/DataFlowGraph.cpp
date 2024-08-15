@@ -60,3 +60,12 @@ void DataFlowGraph::updateConstraint() {
         CodeBlock->update_constraint();
     }
 }
+
+bool DataFlowGraph::is_finished() {
+    for (const auto& CodeBlock : CodeBlock_list) {
+        if (!CodeBlock->is_finished()) {
+            return false;
+        }
+    }
+    return true;
+}
