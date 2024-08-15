@@ -124,7 +124,6 @@ void Inst::remove_async_inst() {
 }
 
 void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    // TODO: Add other instructions, for now it is vector add
     VectorData dst_data;
 
     VectorData src0_data = reg[src0].read_reg();
