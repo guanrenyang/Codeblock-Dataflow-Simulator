@@ -21,10 +21,12 @@ public:
     }
 
     void execute_cycle() {
-        auto load_inst = scheduler->getReadyInstruction<LdInst>();
-        auto store_inst = scheduler->getReadyInstruction<StInst>();
-        auto cal_inst = scheduler->getReadyInstruction<CalInst>();
-        auto copy_inst = scheduler->getReadyInstruction<CopyInst>();
+        load_inst = scheduler->getReadyInstruction<LdInst>();
+        store_inst = scheduler->getReadyInstruction<StInst>();
+        if (cal_inst == nullptr || cal_inst->is_finished()) {
+            cal_inst = scheduler->getReadyInstruction<CalInst>();
+        }
+        copy_inst = scheduler->getReadyInstruction<CopyInst>();
 
         load_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         store_inst->execute(*accessable_reg, accessable_memory, accessable_router);
@@ -67,6 +69,11 @@ public:
         }
     }
 private:
+    std::shared_ptr<Inst> load_inst;
+    std::shared_ptr<Inst> store_inst;
+    std::shared_ptr<Inst> cal_inst;
+    std::shared_ptr<Inst> copy_inst;
+
     std::shared_ptr<Inst> current_inst;
     std::shared_ptr<LocalScheduler> scheduler;
 
