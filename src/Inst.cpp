@@ -239,16 +239,27 @@ void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memo
 };
 
 void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    std::shared_ptr<RoutePackage> load_signal_package = std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx, addr, shared_from_this());
+    std::shared_ptr<RoutePackage> load_signal_package = std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx, addr, interval, shared_from_this());
     router->put(load_signal_package);
     this->register_async_inst();
 };
 
 void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     VectorData store_data = reg[src_reg_idx].read_reg();
-    std::shared_ptr<RoutePackage> store_data_package = std::make_shared<StoreDataPackage>(src_pe_row, src_pe_col, addr, store_data, shared_from_this());
+    std::shared_ptr<RoutePackage> store_data_package = std::make_shared<StoreDataPackage>(src_pe_row, src_pe_col, addr, store_data,  interval, shared_from_this());
     router->put(store_data_package);
     this->register_async_inst();
+};
+
+void MovImmInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    reg[reg_idx].write_reg(data);
+    finished = true;
+};
+
+void MovRegInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    VectorData data = reg[src].read_reg();
+    reg[dst].write_reg(data);
+    finished = true;
 };
 
 bool Inst::is_finished() {

@@ -43,6 +43,18 @@ void DataFlowGraph::appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe
     Inst_list.push_back(copy_inst);
 }
 
+void DataFlowGraph::appendMovImm(std::shared_ptr<CodeBlock> code_block, int reg_idx, VectorData &data ) {
+    std::shared_ptr<Inst> mov_imm_inst = std::make_shared<MovImmInst>(reg_idx, data);
+    code_block->append_instruction(mov_imm_inst);
+    Inst_list.push_back(mov_imm_inst);
+}
+
+void DataFlowGraph::appendMovReg(std::shared_ptr<CodeBlock> code_block, int src, int dst) {
+    std::shared_ptr<Inst> mov_reg_inst = std::make_shared<MovRegInst>(src, dst);
+    code_block->append_instruction(mov_reg_inst);
+    Inst_list.push_back(mov_reg_inst);
+}
+
 void DataFlowGraph::signalDownstream() {
     for (const auto& inst : Inst_list) {
         inst->signal_downstream_if_finished();
