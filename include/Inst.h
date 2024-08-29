@@ -99,7 +99,7 @@ public:
     int reg_idx;
     VectorData data;
 
-    MovImmInst(int reg_idx, VectorData &data) {}
+    MovImmInst(int reg_idx, VectorData &data): reg_idx(reg_idx), data(data) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
@@ -108,7 +108,7 @@ public:
     int src;
     int dst;
 
-    MovRegInst(int src, int dst) {}
+    MovRegInst(int src, int dst):src(src), dst(dst) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 class NopInst final: public Inst {

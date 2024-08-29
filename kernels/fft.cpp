@@ -13,6 +13,10 @@ inline void get_pe_row_col(int idx, int &row, int &col) {
     col = idx % PE_ROWS;
 }
 
+std::array<uint32_t, 32> shuffle_data = {
+    0, 16, 8, 24, 4, 20, 12, 28, 2, 18, 10, 26, 6, 22, 14, 30,
+    1, 17, 9, 25, 5, 21, 13, 29, 3, 19, 11, 27, 7, 23, 15, 31};
+
 int get_pair_id(int n, int interval) {
     int res;
     if ((n / interval) % 2)
@@ -39,14 +43,6 @@ void process_stage(std::shared_ptr<DataFlowGraph> &dfg,
     }
 }
 
-void addButterflyStages(PEArray &pe_array, int pe_row, int pe_col,
-                        const std::vector<std::vector<std::shared_ptr<CodeBlock>>>&stages) {
-    for (int i = 0; i < NUM_IN_USE_REG_PER_PE; i++) {
-        int index = pe_idx(pe_row, pe_col) * NUM_IN_USE_REG_PER_PE + i;
-        for(auto &stage: stages)
-            pe_array.add_CodeBlock(pe_row, pe_col, stage[index]);
-    }
-}
 
 void compute_twiddle_factors(int k, int N, VectorData &real_data,
                              VectorData &imag_data) {
@@ -195,12 +191,10 @@ void butterfly(std::shared_ptr<DataFlowGraph> &dfg,
 
 std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
     std::shared_ptr<DataFlowGraph> dfg = std::make_shared<DataFlowGraph>();
-
     /* initialize all the empty code block handlers (Instances of class
      * `CodeBlock` have not been created) */
     std::vector<std::shared_ptr<CodeBlock>> load_and_shuffle(NUM_PE, nullptr);
-    std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_1(NUM_PE,
-                                                                nullptr);
+    std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_1(NUM_PE, nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_2(
         NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_4(
@@ -224,7 +218,7 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_512(
         NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);
     std::vector<std::shared_ptr<CodeBlock>> store_final_result(
-        NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);
+        NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);  
 
     /* create code blocks and connect them */
     for (auto &cb_ptr : load_and_shuffle) {
@@ -250,7 +244,7 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
     process_stage(dfg, butterfly_compute_2, butterfly_compute_4, 2);
     process_stage(dfg, butterfly_compute_4, butterfly_compute_8, 4);
     process_stage(dfg, butterfly_compute_8, butterfly_compute_16, 8);
-
+    
     for (int pe_idx = 0; pe_idx < NUM_PE; pe_idx++) {
         for (int i = 0; i < NUM_IN_USE_REG_PER_PE; i++) {
             store_32[pe_idx * NUM_IN_USE_REG_PER_PE + i] =
@@ -283,60 +277,63 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
     process_stage(dfg, butterfly_compute_64, butterfly_compute_128, 2);
     process_stage(dfg, butterfly_compute_128, butterfly_compute_256, 4);
     process_stage(dfg, butterfly_compute_256, butterfly_compute_512, 8);
+    process_stage(dfg, butterfly_compute_512, store_final_result, 8);
 
-    /* bind CodeBlocks to PEArray */
     for (int pe_row = 0; pe_row < PE_ROWS; pe_row++) {
         for (int pe_col = 0; pe_col < PE_ROWS; pe_col++) {
             int index = pe_idx(pe_row, pe_col);
             pe_array.add_CodeBlock(pe_row, pe_col, load_and_shuffle[index]);
             pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_1[index]);
-            addButterflyStages(pe_array, pe_row, pe_col,
-                               {butterfly_compute_2, butterfly_compute_4,
-                                butterfly_compute_8, butterfly_compute_16,
-                                store_32, load});
+            for(int i = 0; i < NUM_IN_USE_REG_PER_PE; i++)
+            {
+                int j = index * NUM_IN_USE_REG_PER_PE + i;
+                pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_2[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_4[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_8[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_16[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, store_32[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, load[j]);
+            }
             pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_32[index]);
-
-            addButterflyStages(pe_array, pe_row, pe_col,
-                               {butterfly_compute_64, butterfly_compute_128,
-                                butterfly_compute_256, butterfly_compute_512,
-                                store_final_result});
+            for(int i = 0; i < NUM_IN_USE_REG_PER_PE; i++)
+            {
+                int j = index * NUM_IN_USE_REG_PER_PE + i;
+                pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_64[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_128[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_256[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, butterfly_compute_512[j]);
+                pe_array.add_CodeBlock(pe_row, pe_col, store_final_result[j]);
+            }
         }
     }
-
-    /* append instructions to the code blocks */
-
-    // load and shuffle
+    
     for (int pe_row = 0; pe_row < PE_ROWS; pe_row++) {
         for (int pe_col = 0; pe_col < PE_ROWS; pe_col++) {
             int index = pe_idx(pe_row, pe_col);
-            int spm_start_per_pe =
-                index * NUM_IN_USE_REG_PER_PE * REG_WIDTH_IN_BYTES;
             for (int reg_id = 0; reg_id < NUM_IN_USE_REG_PER_PE; reg_id++) {
-                int spm_offset = reg_id * REG_WIDTH_IN_BYTES;
+                int reg_global_id = index * NUM_IN_USE_REG_PER_PE + reg_id;
+                int shuffled_address = shuffle_data[reg_global_id];
+                int spm_address = shuffled_address * REG_WIDTH_IN_BYTES;
                 // dst_reg_id is reg_id * 2 because it is loaded as a real
                 // number but the imaginary part needs to be preserved for later
                 // calculations
                 dfg->appendLoad(load_and_shuffle[index], pe_row, pe_col,
-                                reg_id * 2, spm_start_per_pe + spm_offset);
-            }
-            // jwhuang TODO: get the shuffle data right
-            std::array<uint32_t, 32> uint32_data = {
-                1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
-                17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
-            VectorData shuffle_mask;
-            std::memcpy(shuffle_mask.data(), uint32_data.data(),
-                        shuffle_mask.size());
-            dfg->appendMovImm(load_and_shuffle[index], NUM_IN_USE_REG_PER_PE * 2,
-                              shuffle_mask);
-
+                              reg_id * 2, spm_address);
+                VectorData shuffle_mask;
+                std::memcpy(shuffle_mask.data(), shuffle_data.data(),
+                            shuffle_mask.size());
+                
+                dfg->appendMovImm(load_and_shuffle[index],
+                            NUM_IN_USE_REG_PER_PE * 2, shuffle_mask);
+                
                 for (int reg_id = 0; reg_id < NUM_IN_USE_REG_PER_PE; reg_id++) {
-                dfg->appendCal(load_and_shuffle[index], 9, reg_id * 2, reg_id * 2,
-                               NUM_IN_USE_REG_PER_PE * 2);
+                    dfg->appendCal(load_and_shuffle[index], 9, reg_id * 2, reg_id *
+                2, NUM_IN_USE_REG_PER_PE * 2);
+                }
             }
         }
     }
 
-    // butterfly_compute_1
     for (int pe_row = 0; pe_row < PE_ROWS; pe_row++) {
         for (int pe_col = 0; pe_col < PE_ROWS; pe_col++) {
             int index = pe_idx(pe_row, pe_col);
@@ -350,7 +347,7 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
             dfg->appendCal(butterfly_compute_1[index], 0, 5, 1, 3);
             // | reg2 | reg3 |=  A - B
             dfg->appendCal(butterfly_compute_1[index], 1, 2, 0, 2);
-            dfg->appendCal(butterfly_compute_1[index], 1, 3, 1, 3);
+            dfg->appendCal(butterfly_compute_1[index], 1, 3, 1, 3);    
 
             // | reg0 | reg1 |=  | reg4 | reg5 | (A + B)
             dfg->appendMovReg(butterfly_compute_1[index], 0, 4);
@@ -358,14 +355,12 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
         }
     }
 
-    // butterfly_compute_2
-
     butterfly(dfg, butterfly_compute_2, 1);
     butterfly(dfg, butterfly_compute_4, 2);
     butterfly(dfg, butterfly_compute_8, 4);
     butterfly(dfg, butterfly_compute_16, 8);
 
-    // store32
+        // store32
     int real_address = 0,
         imag_address = NUM_PE * NUM_IN_USE_REG_PER_PE * REG_WIDTH_IN_BYTES;
     int interval = REG_WIDTH_IN_BYTES;
@@ -426,7 +421,7 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
             dfg->appendMovReg(butterfly_compute_1[index], 1, 5);
         }
     }
-
+    
     butterfly(dfg, butterfly_compute_64, 1);
     butterfly(dfg, butterfly_compute_128, 2);
     butterfly(dfg, butterfly_compute_256, 4);
@@ -442,10 +437,10 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
             // 一个数字的实数和虚数放在一起
             for (int i = 0; i < NUM_IN_USE_REG_PER_PE; i++) {
                 int cb_idx = index * NUM_IN_USE_REG_PER_PE + i;
-                dfg->appendLoad(store_final_result[cb_idx], pe_row, pe_col,
+                dfg->appendStore(store_final_result[cb_idx], pe_row, pe_col,
                                 i * 2, store_address);
                 store_address += step;
-                dfg->appendLoad(store_final_result[cb_idx], pe_row, pe_col,
+                dfg->appendStore(store_final_result[cb_idx], pe_row, pe_col,
                                 i * 2 + 1, store_address);
                 store_address += step;
             }

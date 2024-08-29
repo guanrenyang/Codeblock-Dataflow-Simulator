@@ -51,3 +51,5 @@ template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<LdInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<StInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<CalInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<CopyInst>();
+template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<MovImmInst>();
+template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<MovRegInst>();
