@@ -29,8 +29,8 @@ public:
         delete[] data;
     }
 
-    VectorData read(uint32_t addr);
-    void write(uint32_t addr, VectorData data);
+    VectorData read(uint32_t addr, int interval);
+    void write(uint32_t addr, VectorData data, int interval);
     int getDelay();
 
 };

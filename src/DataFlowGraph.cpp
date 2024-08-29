@@ -25,14 +25,14 @@ void DataFlowGraph::appendCal(std::shared_ptr<CodeBlock> code_block, int opcode,
     Inst_list.push_back(cal_inst);
 }
 
-void DataFlowGraph::appendLoad(std::shared_ptr<CodeBlock> code_block, int pe_row, int pe_col, int reg_idx, int spm_addr) {
-    std::shared_ptr<Inst> ld_inst = std::make_shared<LdInst>(pe_row, pe_col, reg_idx, spm_addr);
+void DataFlowGraph::appendLoad(std::shared_ptr<CodeBlock> code_block, int pe_row, int pe_col, int reg_idx, int spm_addr, int interval) {
+    std::shared_ptr<Inst> ld_inst = std::make_shared<LdInst>(pe_row, pe_col, reg_idx, spm_addr, interval);
     code_block->append_instruction(ld_inst);
     Inst_list.push_back(ld_inst);
 }
 
-void DataFlowGraph::appendStore(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int spm_addr) {
-    std::shared_ptr<Inst> st_inst = std::make_shared<StInst>(src_pe_row, src_pe_col, src_reg_idx, spm_addr);
+void DataFlowGraph::appendStore(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int spm_addr, int interval) {
+    std::shared_ptr<Inst> st_inst = std::make_shared<StInst>(src_pe_row, src_pe_col, src_reg_idx, spm_addr, interval);
     code_block->append_instruction(st_inst);
     Inst_list.push_back(st_inst);
 }
@@ -41,6 +41,18 @@ void DataFlowGraph::appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe
     std::shared_ptr<Inst> copy_inst = std::make_shared<CopyInst>(src_pe_row, src_pe_col, src_reg_idx, dst_pe_row, dst_pe_col, dst_reg_idx);
     code_block->append_instruction(copy_inst);
     Inst_list.push_back(copy_inst);
+}
+
+void DataFlowGraph::appendMovImm(std::shared_ptr<CodeBlock> code_block, int reg_idx, VectorData &data ) {
+    std::shared_ptr<Inst> mov_imm_inst = std::make_shared<MovImmInst>(reg_idx, data);
+    code_block->append_instruction(mov_imm_inst);
+    Inst_list.push_back(mov_imm_inst);
+}
+
+void DataFlowGraph::appendMovReg(std::shared_ptr<CodeBlock> code_block, int src, int dst) {
+    std::shared_ptr<Inst> mov_reg_inst = std::make_shared<MovRegInst>(src, dst);
+    code_block->append_instruction(mov_reg_inst);
+    Inst_list.push_back(mov_reg_inst);
 }
 
 void DataFlowGraph::signalDownstream() {

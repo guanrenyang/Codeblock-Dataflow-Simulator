@@ -74,7 +74,7 @@ public:
     }
 
     void read_to_pe(std::shared_ptr<LoadSignalPackage> package) {
-        VectorData res = this->spm->read(package->spm_addr);
+        VectorData res = this->spm->read(package->spm_addr, package->interval);
         std::shared_ptr<RoutePackage> load_data_package = std::make_shared<LoadDataPackage>(package->dst_pe_row_idx, package->dst_pe_col_idx, package->reg_idx, res, package->inst);
         load_data_package->remaining_hops += this->spm->getDelay(); // [temporary] hack into LoadDataPackage to simulate SPM delay
         this->router->put(load_data_package);
@@ -82,7 +82,7 @@ public:
 
     void write_spm(std::shared_ptr<StoreDataPackage> package) {
         std::shared_ptr<RoutePackage> store_ack_signal = std::make_shared<StoreAckPackage>(package->inst, package->pe_row, package->pe_col);
-        this->spm->write(package->spm_addr, package->data);
+        this->spm->write(package->spm_addr, package->data, package->interval);
         store_ack_signal->remaining_hops += this->spm->getDelay(); // [temporary] hack into StoreAckPackage to simulate SPM delay
         this->router->put(store_ack_signal);
     }
@@ -93,7 +93,7 @@ public:
     }
 
     void display_spm(uint32_t addr) {
-        VectorData data = this->spm->read(addr);
+        VectorData data = this->spm->read(addr,1);
         auto* fp32_data_ptr = reinterpret_cast<float*>(data.data());
         std::cout << "SPM " << addr << ": ";
         for (int i=0;i<128/sizeof(float);i++) {

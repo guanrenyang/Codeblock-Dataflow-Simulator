@@ -2,6 +2,7 @@
 #define INST_H
 
 #include "common.h"
+#include "VectorRegister.h"
 
 class Router;
 class SPM;
@@ -66,7 +67,8 @@ public:
     int dst_pe_col;
     int dst_reg_idx;
     int addr;
-    LdInst(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr) : dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), addr(addr) {}
+    int interval;
+    LdInst(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr, int interval = 1) : dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), addr(addr), interval(interval) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
@@ -76,7 +78,8 @@ public:
     int src_pe_col;
     int src_reg_idx;
     uint32_t addr;
-    StInst(int src_pe_row, int src_pe_col, int src_reg_idx, uint32_t addr) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), addr(addr) {}
+    int interval;
+    StInst(int src_pe_row, int src_pe_col, int src_reg_idx, uint32_t addr, int interval = 1) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), addr(addr), interval(interval) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
@@ -89,6 +92,23 @@ public:
     int src_reg_idx;
     int dst_reg_idx;
     CopyInst(int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx) {}
+    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
+};
+class MovImmInst final: public Inst {
+public:
+    int reg_idx;
+    VectorData data;
+
+    MovImmInst(int reg_idx, VectorData &data): reg_idx(reg_idx), data(data) {}
+    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
+};
+
+class MovRegInst final: public Inst {
+public:
+    int src;
+    int dst;
+
+    MovRegInst(int src, int dst):src(src), dst(dst) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 class NopInst final: public Inst {

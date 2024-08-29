@@ -8,105 +8,181 @@
 template <typename T>
 static void add_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
     for (int i = 0; i < num_element; i++) {
-        dst_ptr[i] = src0_ptr[i] + src1_ptr[i];
+        temp_ptr[i] = src0_ptr[i] + src1_ptr[i];
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>
 static void sub_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
     for (int i = 0; i < num_element; i++) {
-        dst_ptr[i] = src0_ptr[i] - src1_ptr[i];
+        temp_ptr[i] = src0_ptr[i] - src1_ptr[i];
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>
 static void mul_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
     for (int i = 0; i < num_element; i++) {
-        // Perform multiplication and truncate to T's range
-        dst_ptr[i] = src0_ptr[i] * src1_ptr[i];
+        temp_ptr[i] = src0_ptr[i] * src1_ptr[i];
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>
 static void max_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
     for (int i = 0; i < num_element; i++) {
-        dst_ptr[i] = src0_ptr[i] > src1_ptr[i] ? src0_ptr[i] : src1_ptr[i];
+        temp_ptr[i] = (src0_ptr[i] > src1_ptr[i]) ? src0_ptr[i] : src1_ptr[i];
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>
 static void min_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
     for (int i = 0; i < num_element; i++) {
-        dst_ptr[i] = src0_ptr[i] < src1_ptr[i] ? src0_ptr[i] : src1_ptr[i];
+        temp_ptr[i] = (src0_ptr[i] < src1_ptr[i]) ? src0_ptr[i] : src1_ptr[i];
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>
 static void eq_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
     for (int i = 0; i < num_element; i++) {
-        dst_ptr[i] = src0_ptr[i] == src1_ptr[i]? 1 : 0;
+        temp_ptr[i] = (src0_ptr[i] == src1_ptr[i]) ? 1 : 0;
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>
 static void lt_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
     for (int i = 0; i < num_element; i++) {
-        dst_ptr[i] = src0_ptr[i] < src1_ptr[i] ? 1 : 0;
+        temp_ptr[i] = (src0_ptr[i] < src1_ptr[i]) ? 1 : 0;
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>
 static void gt_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
     const T* src1_ptr = reinterpret_cast<const T*>(src1.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
     for (int i = 0; i < num_element; i++) {
-        dst_ptr[i] = src0_ptr[i] > src1_ptr[i] ? 1 : 0;
+        temp_ptr[i] = (src0_ptr[i] > src1_ptr[i]) ? 1 : 0;
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>
 static void v_add(VectorData& dst, const VectorData& src0, const VectorData& src1) {
     // src1 is discarded
     int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
     const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
-    T* dst_ptr = reinterpret_cast<T*>(dst.data());
+
+    // initialize temp as 0
+    std::fill(temp_ptr, temp_ptr + num_element, T(0));
+
     for (int i = 0; i < num_element; i++) {
-        dst_ptr[0] += src0_ptr[i];
+        temp_ptr[0] += src0_ptr[i];
     }
+
     for (int i = 1; i < num_element; i++) {
-        dst_ptr[i] = dst_ptr[0];
+        temp_ptr[i] = temp_ptr[0];
     }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
+
+template <typename T>
+static void shuffle(VectorData& dst, const VectorData& src, const VectorData& shuffle_mask) {
+    int num_element = dst.size() / sizeof(T);
+
+    const T* src_ptr = reinterpret_cast<const T*>(src.data());
+    const T* sm_ptr = reinterpret_cast<const T*>(shuffle_mask.data());
+
+    std::vector<T> temp_ptr(num_element);
+
+    for (int i = 0; i < num_element; i++) {
+        int shuffle_index = static_cast<int>(sm_ptr[i]);
+        assert(shuffle_index >= 0 && shuffle_index < num_element);
+        temp_ptr[i] = src_ptr[shuffle_index];
+    }
+
+    std::memcpy(dst.data(), temp_ptr.data(), dst.size());
+}
+
 
 void Inst::register_async_inst() {
 #ifdef DEBUG
@@ -145,6 +221,7 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
         case 6: lt_vv<float>(dst_data, src0_data, src1_data); break;
         case 7: gt_vv<float>(dst_data, src0_data, src1_data); break;
         case 8: v_add<float>(dst_data, src0_data, src1_data); break;
+        case 9: shuffle<float>(dst_data, src0_data, src1_data); break;
     }
 
     reg[dst].write_reg(dst_data);
@@ -162,16 +239,27 @@ void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memo
 };
 
 void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    std::shared_ptr<RoutePackage> load_signal_package = std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx, addr, shared_from_this());
+    std::shared_ptr<RoutePackage> load_signal_package = std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx, addr, interval, shared_from_this());
     router->put(load_signal_package);
     this->register_async_inst();
 };
 
 void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     VectorData store_data = reg[src_reg_idx].read_reg();
-    std::shared_ptr<RoutePackage> store_data_package = std::make_shared<StoreDataPackage>(src_pe_row, src_pe_col, addr, store_data, shared_from_this());
+    std::shared_ptr<RoutePackage> store_data_package = std::make_shared<StoreDataPackage>(src_pe_row, src_pe_col, addr, store_data,  interval, shared_from_this());
     router->put(store_data_package);
     this->register_async_inst();
+};
+
+void MovImmInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    reg[reg_idx].write_reg(data);
+    finished = true;
+};
+
+void MovRegInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    VectorData data = reg[src].read_reg();
+    reg[dst].write_reg(data);
+    finished = true;
 };
 
 bool Inst::is_finished() {

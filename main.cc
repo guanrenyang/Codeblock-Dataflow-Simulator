@@ -4,11 +4,13 @@
 int display(PEArray & pe_array, int cycle);
 
 std::shared_ptr<DataFlowGraph> vector_add(PEArray & pe_array);
+std::shared_ptr<DataFlowGraph> fft_1024(PEArray & pe_array);
 
 int main() {
     PEArray pe_array(4, 4, 6*1024*1024);
 
-    auto dfg = vector_add(pe_array);
+    //auto dfg = vector_add(pe_array);
+    auto dfg = fft_1024(pe_array);
 
     display(pe_array, 0);
     int cycle_idx = 0;
