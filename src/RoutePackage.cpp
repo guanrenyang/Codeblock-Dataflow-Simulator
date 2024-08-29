@@ -36,11 +36,12 @@ void CopyDataPackage::operate(std::shared_ptr<Router> router) {
 #endif
 } 
 
-LoadSignalPackage::LoadSignalPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr, std::shared_ptr<Inst> inst) : RoutePackage(inst) {
+LoadSignalPackage::LoadSignalPackage(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr, int interval, std::shared_ptr<Inst> inst) : RoutePackage(inst) {
     this->dst_pe_row_idx = dst_pe_row;
     this->dst_pe_col_idx = dst_pe_col;
     this->reg_idx = dst_reg_idx;
     this->spm_addr = addr;
+    this->interval = interval;
     // suppose SPM is on the top left of PEarrays, and it needs s1 hop to PE(0,0)
     this->remaining_hops = std::abs(0 - dst_pe_row) + std::abs(0 - dst_pe_col) + 1;
 #ifdef DEBUG
@@ -78,12 +79,13 @@ void LoadDataPackage::operate(std::shared_ptr<Router> router) {
 #endif
 }
 
-StoreDataPackage::StoreDataPackage(int src_pe_row, int src_pe_col, uint32_t addr, VectorData src_data, std::shared_ptr<Inst> inst) : RoutePackage(inst){
+StoreDataPackage::StoreDataPackage(int src_pe_row, int src_pe_col, uint32_t addr, VectorData src_data, int interval, std::shared_ptr<Inst> inst) : RoutePackage(inst){
     this->spm_addr = addr;
     this->data = src_data;
     this->pe_row = src_pe_row;
     this->pe_col = src_pe_col;
     this->remaining_hops = std::abs(0 - pe_row) + std::abs(0 - pe_col) + 1;
+    this->interval = interval;
 #ifdef DEBUG
     std::cout << "StoreDataPackage create: " << src_pe_row << " " << src_pe_col << " " << addr << std::endl;
 #endif

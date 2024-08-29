@@ -2,6 +2,7 @@
 #define DATAFLOW_SIMULATOR_DFGBUILDER_H
 
 #include "common.h"
+#include "VectorRegister.h"
 
 class CodeBlock;
 class Inst;

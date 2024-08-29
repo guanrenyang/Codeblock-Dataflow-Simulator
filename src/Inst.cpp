@@ -162,7 +162,7 @@ static void v_add(VectorData& dst, const VectorData& src0, const VectorData& src
         temp_ptr[i] = temp_ptr[0];
     }
 
-    std::memcpy(dst.data(), temp_ptr.data(), dst.size());
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 template <typename T>

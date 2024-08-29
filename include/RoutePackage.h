@@ -42,6 +42,7 @@ public:
     int dst_pe_col_idx;
     int reg_idx;
     int spm_addr;
+    int interval;
 };
 
 class LoadDataPackage final : public RoutePackage {
@@ -62,6 +63,7 @@ public:
     void operate(std::shared_ptr<Router> router); 
     int pe_row, pe_col;
     uint32_t spm_addr;
+    int interval;
     VectorData data;
 };
 

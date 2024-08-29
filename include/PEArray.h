@@ -93,7 +93,7 @@ public:
     }
 
     void display_spm(uint32_t addr) {
-        VectorData data = this->spm->read(addr,package->interval);
+        VectorData data = this->spm->read(addr,1);
         auto* fp32_data_ptr = reinterpret_cast<float*>(data.data());
         std::cout << "SPM " << addr << ": ";
         for (int i=0;i<128/sizeof(float);i++) {
