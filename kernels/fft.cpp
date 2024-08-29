@@ -6,7 +6,8 @@
 const int PE_ROWS = 4;
 const int NUM_PE = PE_ROWS * PE_ROWS;
 inline int pe_idx(int row, int col) { return row * PE_ROWS + col; }
-const NUM_IN_USE_REG_PER_PE = 2 const int REG_WIDTH_IN_BYTES = 128; // Bytes
+const int NUM_IN_USE_REG_PER_PE = 2;
+const int REG_WIDTH_IN_BYTES = 128; // Bytes
 inline void get_pe_row_col(int idx, int &row, int &col) {
     row = idx / PE_ROWS;
     col = idx % PE_ROWS;
@@ -38,13 +39,12 @@ void process_stage(std::shared_ptr<DataFlowGraph> &dfg,
     }
 }
 
-void addButterflyStages(PeArray &pe_array, int pe_row, int pe_col,
-                        const std::vector<std::vector<std::string>> &stages) {
+void addButterflyStages(PEArray &pe_array, int pe_row, int pe_col,
+                        const std::vector<std::vector<std::shared_ptr<CodeBlock>>>&stages) {
     for (int i = 0; i < NUM_IN_USE_REG_PER_PE; i++) {
         int index = pe_idx(pe_row, pe_col) * NUM_IN_USE_REG_PER_PE + i;
-        for (const auto &stage : stages) {
+        for(auto &stage: stages)
             pe_array.add_CodeBlock(pe_row, pe_col, stage[index]);
-        }
     }
 }
 
@@ -89,10 +89,12 @@ void butterfly(std::shared_ptr<DataFlowGraph> &dfg,
             for (int i = reg_data_start; i < reg_data_end; i++) {
                 // 根据 pair_index 和 index 的关系设置数据位置
                 int cb_idx = index * NUM_IN_USE_REG_PER_PE + i;
+                int real_data_A, imag_data_A, real_data_B, imag_data_B;
                 if (pair_index > index) {
-                    int real_data_A = i * 2, imag_data_A = i * 2 + 1;
-                    int real_data_B = real_data_A + NUM_IN_USE_REG_PER_PE * 2,
-                        imag_data_B = imag_data_A + NUM_IN_USE_REG_PER_PE * 2;
+                    real_data_A = i * 2;
+                    imag_data_A = i * 2 + 1;
+                    real_data_B = real_data_A + NUM_IN_USE_REG_PER_PE * 2;
+                    imag_data_B = imag_data_A + NUM_IN_USE_REG_PER_PE * 2;
                     dfg->appendCopy(butterfly_compute[cb_idx], pair_pe_row,
                                     pair_pe_col, real_data_A, pe_row, pe_col,
                                     real_data_B);
@@ -100,9 +102,10 @@ void butterfly(std::shared_ptr<DataFlowGraph> &dfg,
                                     pair_pe_col, imag_data_A, pe_row, pe_col,
                                     imag_data_B);
                 } else {
-                    int real_data_B = i * 2, imag_data_B = i * 2 + 1;
-                    int real_data_A = real_data_B + NUM_IN_USE_REG_PER_PE * 2,
-                        imag_data_A = imag_data_B + NUM_IN_USE_REG_PER_PE * 2;
+                    real_data_B = i * 2;
+                    imag_data_B = i * 2 + 1;
+                    real_data_A = real_data_B + NUM_IN_USE_REG_PER_PE * 2;
+                    imag_data_A = imag_data_B + NUM_IN_USE_REG_PER_PE * 2;
                     dfg->appendCopy(butterfly_compute[cb_idx], pair_pe_row,
                                     pair_pe_col, real_data_B, pe_row, pe_col,
                                     real_data_A);
@@ -118,9 +121,9 @@ void butterfly(std::shared_ptr<DataFlowGraph> &dfg,
                 compute_twiddle_factors(k, N, twiddle_real, twiddle_imag);
                 int twiddle_real_reg = NUM_IN_USE_REG_PER_PE * 2 * 2;
                 int twiddle_imag_reg = twiddle_real_reg + 1;
-                dfg->appendMovIMM(butterfly_compute[cb_idx], twiddle_real_reg,
+                dfg->appendMovImm(butterfly_compute[cb_idx], twiddle_real_reg,
                                   twiddle_real);
-                dfg->appendMovIMM(butterfly_compute[cb_idx], twiddle_imag_reg,
+                dfg->appendMovImm(butterfly_compute[cb_idx], twiddle_imag_reg,
                                   twiddle_imag);
 
                 // Butterfly 计算
@@ -199,7 +202,7 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_1(NUM_PE,
                                                                 nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_2(
-        NUM_PE * NUM_IN_USE_REG_PER_PE, , nullptr);
+        NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_4(
         NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_8(
@@ -213,9 +216,9 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_32(NUM_PE,
                                                                  nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_64(
-        NUM_PE * NUM_IN_USE_REG_PER_PE, , nullptr);
+        NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_128(
-        NUM_PE * NUM_IN_USE_REG_PER_PE, , nullptr);
+        NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_256(
         NUM_PE * NUM_IN_USE_REG_PER_PE, nullptr);
     std::vector<std::shared_ptr<CodeBlock>> butterfly_compute_512(
@@ -323,11 +326,11 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
             VectorData shuffle_mask;
             std::memcpy(shuffle_mask.data(), uint32_data.data(),
                         shuffle_mask.size());
-            dfg->appendMovIMM(load_and_add[index], NUM_IN_USE_REG_PER_PE * 2,
-                              shuffle_mask)
+            dfg->appendMovImm(load_and_shuffle[index], NUM_IN_USE_REG_PER_PE * 2,
+                              shuffle_mask);
 
                 for (int reg_id = 0; reg_id < NUM_IN_USE_REG_PER_PE; reg_id++) {
-                dfg->appendCal(load_and_add[index], 9, reg_id * 2, reg_id * 2,
+                dfg->appendCal(load_and_shuffle[index], 9, reg_id * 2, reg_id * 2,
                                NUM_IN_USE_REG_PER_PE * 2);
             }
         }
@@ -371,7 +374,7 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
         for (int pe_col = 0; pe_col < PE_ROWS; pe_col++) {
             int index = pe_idx(pe_row, pe_col);
             // 先存实数，再存虚数
-            for (int i = 0, i < NUM_IN_USE_REG_PER_PE; i++) {
+            for (int i = 0; i < NUM_IN_USE_REG_PER_PE; i++) {
                 int cb_idx = index * NUM_IN_USE_REG_PER_PE + i;
                 dfg->appendStore(store_32[cb_idx], pe_row, pe_col, i * 2,
                                  real_address, interval);
@@ -383,14 +386,14 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
         }
     }
     // load
-    int step = REG_WIDTH_IN_BYTES;
-    int real_address = 0,
-        imag_address = NUM_PE * NUM_IN_USE_REG_PER_PE * REG_WIDTH_IN_BYTES;
+    step = REG_WIDTH_IN_BYTES;
+    real_address = 0,
+    imag_address = NUM_PE * NUM_IN_USE_REG_PER_PE * REG_WIDTH_IN_BYTES;
     for (int pe_row = 0; pe_row < PE_ROWS; pe_row++) {
         for (int pe_col = 0; pe_col < PE_ROWS; pe_col++) {
             int index = pe_idx(pe_row, pe_col);
             // 先laod实数，再load虚数
-            for (int i = 0, i < NUM_IN_USE_REG_PER_PE; i++) {
+            for (int i = 0; i < NUM_IN_USE_REG_PER_PE; i++) {
                 int cb_idx = index * NUM_IN_USE_REG_PER_PE + i;
                 dfg->appendLoad(load[cb_idx], pe_row, pe_col, i * 2,
                                 real_address);
@@ -430,13 +433,14 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
     butterfly(dfg, butterfly_compute_512, 8);
 
     // store_final_result
-    int step = REG_WIDTH_IN_BYTES;
+    step = REG_WIDTH_IN_BYTES;
     // 可以覆盖之前的地址
-    int store_address = 0, for (int pe_row = 0; pe_row < PE_ROWS; pe_row++) {
+    int store_address = 0;
+    for (int pe_row = 0; pe_row < PE_ROWS; pe_row++) {
         for (int pe_col = 0; pe_col < PE_ROWS; pe_col++) {
             int index = pe_idx(pe_row, pe_col);
             // 一个数字的实数和虚数放在一起
-            for (int i = 0, i < NUM_IN_USE_REG_PER_PE; i++) {
+            for (int i = 0; i < NUM_IN_USE_REG_PER_PE; i++) {
                 int cb_idx = index * NUM_IN_USE_REG_PER_PE + i;
                 dfg->appendLoad(store_final_result[cb_idx], pe_row, pe_col,
                                 i * 2, store_address);
@@ -447,4 +451,5 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
             }
         }
     }
+    return dfg;
 }
