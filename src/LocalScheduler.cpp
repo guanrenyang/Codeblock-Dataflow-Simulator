@@ -50,4 +50,5 @@ void LocalScheduler::check_waiting_CodeBlocks() {
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<LdInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<StInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<CalInst>();
+template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<TensorCalInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<CopyInst>();

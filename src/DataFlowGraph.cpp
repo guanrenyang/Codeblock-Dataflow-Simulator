@@ -25,6 +25,12 @@ void DataFlowGraph::appendCal(std::shared_ptr<CodeBlock> code_block, int opcode,
     Inst_list.push_back(cal_inst);
 }
 
+void DataFlowGraph::appendTensorCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1) {
+    std::shared_ptr<Inst> tensor_cal_inst = std::make_shared<TensorCalInst>(opcode, dst, src0, src1);
+    code_block->append_instruction(tensor_cal_inst);
+    Inst_list.push_back(tensor_cal_inst);
+}
+
 void DataFlowGraph::appendLoad(std::shared_ptr<CodeBlock> code_block, int pe_row, int pe_col, int reg_idx, int spm_addr) {
     std::shared_ptr<Inst> ld_inst = std::make_shared<LdInst>(pe_row, pe_col, reg_idx, spm_addr);
     code_block->append_instruction(ld_inst);

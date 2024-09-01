@@ -16,3 +16,4 @@ file(GLOB KERNELS "kernels/*.cpp")
 add_executable(Dataflow-Simulator ${SOURCES} ${KERNELS} main.cc)
 
 add_executable(Dataflow-Test ${SOURCES} ${KERNELS} "${CMAKE_CURRENT_SOURCE_DIR}/test/test_parallel_codeblock.cpp")
+add_executable(tensor-core-test ${SOURCES} "${CMAKE_CURRENT_SOURCE_DIR}/test/test_tensor_core.cpp")

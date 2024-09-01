@@ -8,6 +8,7 @@ class Router;
 class SPM;
 
 typedef std::array<uint8_t, 128> VectorData;
+typedef std::array<uint8_t, 512> TensorData;
 
 class RoutePackage {
 private:
