@@ -19,10 +19,10 @@ public:
         this->delay = delay;
         
         // Initialize some data for testing.
-        float* float_data = reinterpret_cast<float*>(data);
-        for (int i = 0; i < 1024; i++) {
+        half* float_data = reinterpret_cast<half*>(data);
+        for (int i = 0; i < 512; i++) {
             // float_data[i] = static_cast<float>(i) + 5.0f;
-            float_data[i] = 1.0f;
+            float_data[i] = half(1.0);
         }
     }
     ~SPM(){

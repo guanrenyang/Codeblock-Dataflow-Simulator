@@ -92,12 +92,29 @@ public:
         PE_array_2d[pe_row][pe_col].display_reg_as_fp32(reg_idx);
     }
 
+    template<typename T>
+    void display_reg_as(int pe_row, int pe_col, int reg_idx){
+        std::cout << "PE " << pe_row << pe_col << ", REG " << reg_idx << " : ";
+        PE_array_2d[pe_row][pe_col].display_reg_as<T>(reg_idx);
+    }
+
     void display_spm(uint32_t addr) {
         VectorData data = this->spm->read(addr);
         auto* fp32_data_ptr = reinterpret_cast<float*>(data.data());
         std::cout << "SPM " << addr << ": ";
         for (int i=0;i<128/sizeof(float);i++) {
             std::cout << fp32_data_ptr[i] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    template<typename T>
+    void display_spm_in_vector_as(uint32_t addr) {
+        VectorData data = this->spm->read(addr);
+        auto* data_ptr = reinterpret_cast<T*>(data.data());
+        std::cout << "SPM " << addr << ": ";
+        for (int i=0;i<128/sizeof(T);i++) {
+            std::cout << data_ptr[i] << " ";
         }
         std::cout << std::endl;
     }
