@@ -1,14 +1,20 @@
 #include "PEArray.h"
 #include "DataFlowGraph.h"
+#include <fstream>
+
 
 int display(PEArray & pe_array, int cycle);
 
-std::shared_ptr<DataFlowGraph> vector_add(PEArray & pe_array);
+std::shared_ptr<DataFlowGraph> kmeans(PEArray & pe_array);
 
 int main() {
     PEArray pe_array(4, 4, 6*1024*1024);
 
-    auto dfg = vector_add(pe_array);
+    auto dfg = kmeans(pe_array);
+    
+    std::ofstream outfile("output.txt");
+    std::streambuf* coutBuf = std::cout.rdbuf();
+    std::cout.rdbuf(outfile.rdbuf());
 
     display(pe_array, 0);
     int cycle_idx = 0;

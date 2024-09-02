@@ -11,7 +11,7 @@ endif()
 include_directories(include)
 
 file(GLOB SOURCES "src/*.cpp")
-file(GLOB KERNELS "kernels/*.cpp")
+file(GLOB KERNELS "kernels/kmeans.cpp")
 
 add_executable(Dataflow-Simulator ${SOURCES} ${KERNELS} main.cc)
 
