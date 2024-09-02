@@ -15,7 +15,7 @@ public:
 
     void appendLoad(std::shared_ptr<CodeBlock> code_block, int dst_pe_row, int dst_pe_col, int dst_reg_idx, int spm_addr, bool is_tensor = false);
     void appendStore(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int spm_addr, bool is_tensor = false);
-    void appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx);
+    void appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx, bool is_tensor = false);
     void appendCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1);
     void appendTensorCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1);
 

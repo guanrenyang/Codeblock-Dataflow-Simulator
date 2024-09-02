@@ -211,13 +211,18 @@ void TensorCalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM> 
 }
 
 void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    // Put data on on-chip router
-    VectorData src_data = reg[src_reg_idx].read_reg();
-    std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, src_data, shared_from_this());
-    router->put(copy_data_package);
+    if (!is_tensor) {
+         // Put data on on-chip router
+        router->put(std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, reg[src_reg_idx].read_reg() , shared_from_this()));
+        // register the async instruction
+        this->register_async_inst();
+    } else {
+        for (int i = 0; i < 4; ++i) {
+            router->put(std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx+i, reg[src_reg_idx+i].read_reg(), shared_from_this()));
+            this->register_async_inst();
+        }
+    }
 
-    // register the async instruction
-    this->register_async_inst();
 };
 
 void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {

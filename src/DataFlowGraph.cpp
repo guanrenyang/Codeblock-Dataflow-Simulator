@@ -43,8 +43,8 @@ void DataFlowGraph::appendStore(std::shared_ptr<CodeBlock> code_block, int src_p
     Inst_list.push_back(st_inst);
 }
 
-void DataFlowGraph::appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx) {
-    std::shared_ptr<Inst> copy_inst = std::make_shared<CopyInst>(src_pe_row, src_pe_col, src_reg_idx, dst_pe_row, dst_pe_col, dst_reg_idx);
+void DataFlowGraph::appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx, bool is_tensor) {
+    std::shared_ptr<Inst> copy_inst = std::make_shared<CopyInst>(src_pe_row, src_pe_col, src_reg_idx, dst_pe_row, dst_pe_col, dst_reg_idx, is_tensor);
     code_block->append_instruction(copy_inst);
     Inst_list.push_back(copy_inst);
 }

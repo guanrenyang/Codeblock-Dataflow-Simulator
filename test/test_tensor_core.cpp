@@ -30,16 +30,21 @@ std::shared_ptr<DataFlowGraph> matmul_16_16_16(PEArray & pe_array){
     std::shared_ptr<DataFlowGraph> dfg = std::make_shared<DataFlowGraph>();
 
     std::shared_ptr<CodeBlock> load_cb = dfg->createCodeBlock();
-    std::shared_ptr<CodeBlock> cal_cb = dfg->createDependentCodeBlock(load_cb);
+    std::shared_ptr<CodeBlock> cp_cb = dfg->createDependentCodeBlock(load_cb);
+    std::shared_ptr<CodeBlock> cal_cb = dfg->createDependentCodeBlock(cp_cb);
     std::shared_ptr<CodeBlock> store_cb = dfg->createDependentCodeBlock(cal_cb);
 
-    pe_array.add_CodeBlock(0, 0, load_cb);
+    pe_array.add_CodeBlock(0, 3, load_cb);
+    pe_array.add_CodeBlock(0,3, cp_cb);
     pe_array.add_CodeBlock(0, 0, cal_cb);
     pe_array.add_CodeBlock(0, 0, store_cb);
 
     // prepare input
-    dfg->appendLoad(load_cb, 0, 0, 0, 0*128, true);
-    dfg->appendLoad(load_cb, 0, 0, 4, 4*128, true);
+    dfg->appendLoad(load_cb, 0, 3, 0, 0*128, true);
+    dfg->appendLoad(load_cb, 0, 3, 4, 4*128, true);
+
+    dfg->appendCopy(cp_cb, 0, 3, 0, 0, 0, 0, true);
+    dfg->appendCopy(cp_cb, 0, 3, 4, 0, 0, 4, true);
 
     // calculation
     dfg->appendTensorCal(cal_cb, 0, 8, 0, 4);
