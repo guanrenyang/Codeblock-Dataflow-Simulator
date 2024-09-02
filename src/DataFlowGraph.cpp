@@ -25,20 +25,26 @@ void DataFlowGraph::appendCal(std::shared_ptr<CodeBlock> code_block, int opcode,
     Inst_list.push_back(cal_inst);
 }
 
-void DataFlowGraph::appendLoad(std::shared_ptr<CodeBlock> code_block, int pe_row, int pe_col, int reg_idx, int spm_addr) {
-    std::shared_ptr<Inst> ld_inst = std::make_shared<LdInst>(pe_row, pe_col, reg_idx, spm_addr);
+void DataFlowGraph::appendTensorCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1) {
+    std::shared_ptr<Inst> tensor_cal_inst = std::make_shared<TensorCalInst>(opcode, dst, src0, src1);
+    code_block->append_instruction(tensor_cal_inst);
+    Inst_list.push_back(tensor_cal_inst);
+}
+
+void DataFlowGraph::appendLoad(std::shared_ptr<CodeBlock> code_block, int pe_row, int pe_col, int reg_idx, int spm_addr, bool is_tensor) {
+    std::shared_ptr<Inst> ld_inst = std::make_shared<LdInst>(pe_row, pe_col, reg_idx, spm_addr, is_tensor);
     code_block->append_instruction(ld_inst);
     Inst_list.push_back(ld_inst);
 }
 
-void DataFlowGraph::appendStore(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int spm_addr) {
-    std::shared_ptr<Inst> st_inst = std::make_shared<StInst>(src_pe_row, src_pe_col, src_reg_idx, spm_addr);
+void DataFlowGraph::appendStore(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int spm_addr, bool is_tensor) {
+    std::shared_ptr<Inst> st_inst = std::make_shared<StInst>(src_pe_row, src_pe_col, src_reg_idx, spm_addr, is_tensor);
     code_block->append_instruction(st_inst);
     Inst_list.push_back(st_inst);
 }
 
-void DataFlowGraph::appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx) {
-    std::shared_ptr<Inst> copy_inst = std::make_shared<CopyInst>(src_pe_row, src_pe_col, src_reg_idx, dst_pe_row, dst_pe_col, dst_reg_idx);
+void DataFlowGraph::appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx, bool is_tensor) {
+    std::shared_ptr<Inst> copy_inst = std::make_shared<CopyInst>(src_pe_row, src_pe_col, src_reg_idx, dst_pe_row, dst_pe_col, dst_reg_idx, is_tensor);
     code_block->append_instruction(copy_inst);
     Inst_list.push_back(copy_inst);
 }
@@ -59,4 +65,13 @@ void DataFlowGraph::updateConstraint() {
     for (const auto& CodeBlock : CodeBlock_list) {
         CodeBlock->update_constraint();
     }
+}
+
+bool DataFlowGraph::is_finished() {
+    for (const auto& CodeBlock : CodeBlock_list) {
+        if (!CodeBlock->is_finished()) {
+            return false;
+        }
+    }
+    return true;
 }

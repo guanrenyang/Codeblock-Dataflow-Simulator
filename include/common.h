@@ -13,5 +13,7 @@
 #include <assert.h>
 #include <functional>
 
+#include "half.hpp"
+using half_float::half;
 
 #endif //COMMON_H

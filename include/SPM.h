@@ -29,7 +29,6 @@ public:
         for (int i = 64; i < 1024; i++) {
             float_data[i] = static_cast<float>(i) - 64.0f;
             // float_data[i] = 1.0f;
-        }
     }
     ~SPM(){
         delete[] data;

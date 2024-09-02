@@ -39,7 +39,12 @@ public:
     }
 
     void remove_async_inst(std::shared_ptr<Inst> inst_ptr) { // called when the async instruction is done
-        waiting_async_inst.remove(inst_ptr);
+        for (auto it = waiting_async_inst.begin(); it != waiting_async_inst.end(); ++it) {
+            if (*it == inst_ptr) {
+                waiting_async_inst.erase(it);
+                break; // 只删除第一个匹配的元素后退出循环
+            }
+        }
     }
 
     /* instruction valideness management */

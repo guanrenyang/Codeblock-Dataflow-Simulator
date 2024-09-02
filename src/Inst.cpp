@@ -148,6 +148,22 @@ static void div_vv(VectorData& dst, const VectorData& src0, const VectorData& sr
 }
 
 
+static void fp16_mac_m16_k16_n16(TensorData& dst, const TensorData& src0, const TensorData& src1) {
+    int M = 16, K = 16, N = 16;
+    const half* src0_ptr = reinterpret_cast<const half*>(src0.data());
+    const half* src1_ptr = reinterpret_cast<const half*>(src1.data());
+    half* dst_ptr = reinterpret_cast<half*>(dst.data());
+    for (int m = 0; m < M; m++) {
+        for (int n = 0; n < N; n++) {
+            half sum(0.0);
+            for (int k = 0; k < K; k++) {
+                sum += src0_ptr[m*K + k] * src1_ptr[k*N + n];
+            }
+            dst_ptr[m*N + n] = sum;
+        }
+    }
+}
+
 void Inst::register_async_inst() {
 #ifdef DEBUG
     std::cout << "Registering async inst\n" << std::endl;
@@ -164,7 +180,16 @@ void Inst::remove_async_inst() {
 }
 
 void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    // TODO: Add other instructions, for now it is vector add
+    if (remaining_cycles==total_cycles) {
+        this->register_async_inst();
+    }
+    if (remaining_cycles > 1) {
+        remaining_cycles--;
+        return;
+    }
+    assert(remaining_cycles == 1);
+    remaining_cycles--;
+
     VectorData dst_data;
 
     VectorData src0_data = reg[src0].read_reg();
@@ -186,29 +211,87 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
 
     reg[dst].write_reg(dst_data);
     finished = true;
+    this->remove_async_inst();
 };
 
-void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    // Put data on on-chip router
-    VectorData src_data = reg[src_reg_idx].read_reg();
-    std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, src_data, shared_from_this());
-    router->put(copy_data_package);
+void TensorCalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM> &memory, const std::shared_ptr<Router> &router) {
+    if (remaining_cycles==total_cycles) {
+        this->register_async_inst();
+    }
+    if (remaining_cycles > 1) {
+        remaining_cycles--;
+        return;
+    }
+    assert(remaining_cycles == 1);
+    remaining_cycles--;
 
-    // register the async instruction
-    this->register_async_inst();
+    TensorData dst_data;
+    TensorData src0_data;
+    TensorData src1_data;
+
+    // pack 4 vectors into a tensor
+    size_t back_inserter = 0;
+    for (int i = 0, back_inserter = 0; i < 4; i++, back_inserter+=128) {
+        VectorData src0_vec = reg[src0 + i].read_reg();
+        VectorData src1_vec = reg[src1 + i].read_reg();
+        std::copy(src0_vec.begin(), src0_vec.end(), src0_data.begin()+back_inserter);
+        std::copy(src1_vec.begin(), src1_vec.end(), src1_data.begin()+back_inserter);
+    }
+
+    // perform the operation
+    switch (opcode) {
+        case 0: fp16_mac_m16_k16_n16(dst_data, src0_data, src1_data); break;
+    }
+
+    // write back the tensor to 4 vector registers
+    for (int i = 0; i < 4; i++) {
+        VectorData dst_vec;
+        std::copy_n(dst_data.begin() + 128 * i, 128, dst_vec.begin());
+        reg[dst + i].write_reg(dst_vec);
+    }
+    finished = true;
+    this->remove_async_inst();
+}
+
+void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    if (!is_tensor) {
+         // Put data on on-chip router
+        router->put(std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, reg[src_reg_idx].read_reg() , shared_from_this()));
+        // register the async instruction
+        this->register_async_inst();
+    } else {
+        for (int i = 0; i < 4; ++i) {
+            router->put(std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx+i, reg[src_reg_idx+i].read_reg(), shared_from_this()));
+            this->register_async_inst();
+        }
+    }
+
 };
 
 void LdInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    std::shared_ptr<RoutePackage> load_signal_package = std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx, addr, shared_from_this());
-    router->put(load_signal_package);
-    this->register_async_inst();
+    if (!is_tensor) {
+        router->put(std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx, addr, shared_from_this()));
+        this->register_async_inst();
+    } else {
+        for (int i = 0; i < 4; ++i) {
+            router->put(std::make_shared<LoadSignalPackage>(dst_pe_row, dst_pe_col, dst_reg_idx + i, addr + i * 128, shared_from_this()));
+            this->register_async_inst();
+        }
+    }
 };
 
 void StInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
-    VectorData store_data = reg[src_reg_idx].read_reg();
-    std::shared_ptr<RoutePackage> store_data_package = std::make_shared<StoreDataPackage>(src_pe_row, src_pe_col, addr, store_data, shared_from_this());
-    router->put(store_data_package);
-    this->register_async_inst();
+    if (!is_tensor) {
+        VectorData store_data = reg[src_reg_idx].read_reg();
+        router->put(std::make_shared<StoreDataPackage>(src_pe_row, src_pe_col, addr, store_data,shared_from_this()));
+        this->register_async_inst();
+    } else {
+        for (int i = 0; i < 4; ++i) {
+            VectorData store_data = reg[src_reg_idx+i].read_reg();
+            router->put(std::make_shared<StoreDataPackage>(src_pe_row, src_pe_col, addr+i*128, store_data,shared_from_this()));
+            this->register_async_inst();
+        }
+    }
 };
 
 bool Inst::is_finished() {

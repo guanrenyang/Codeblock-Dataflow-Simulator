@@ -21,7 +21,7 @@ std::shared_ptr<Inst> LocalScheduler::getReadyInstruction() {
     for (auto & ready_CodeBlock : ready_CodeBlocks) {
         if (ready_CodeBlock->has_valid_instruction()) {
             auto front_inst = ready_CodeBlock->frontInstruction();
-            if (std::dynamic_pointer_cast<InstType>(front_inst) != nullptr) {
+            if (std::dynamic_pointer_cast<InstType>(front_inst) != nullptr) { // select instruction type
                 return_inst = ready_CodeBlock->popInstruction();
                 break;
             }
@@ -50,4 +50,5 @@ void LocalScheduler::check_waiting_CodeBlocks() {
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<LdInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<StInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<CalInst>();
+template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<TensorCalInst>();
 template std::shared_ptr<Inst> LocalScheduler::getReadyInstruction<CopyInst>();

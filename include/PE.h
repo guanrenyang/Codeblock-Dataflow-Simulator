@@ -21,14 +21,20 @@ public:
     }
 
     void execute_cycle() {
-        auto load_inst = scheduler->getReadyInstruction<LdInst>();
-        auto store_inst = scheduler->getReadyInstruction<StInst>();
-        auto cal_inst = scheduler->getReadyInstruction<CalInst>();
-        auto copy_inst = scheduler->getReadyInstruction<CopyInst>();
+        load_inst = scheduler->getReadyInstruction<LdInst>();
+        store_inst = scheduler->getReadyInstruction<StInst>();
+        if (cal_inst == nullptr || cal_inst->is_finished()) {
+            cal_inst = scheduler->getReadyInstruction<CalInst>();
+        }
+        if (tensor_cal_inst == nullptr || tensor_cal_inst->is_finished()) {
+            tensor_cal_inst = scheduler->getReadyInstruction<TensorCalInst>();
+        }
+        copy_inst = scheduler->getReadyInstruction<CopyInst>();
 
         load_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         store_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         cal_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+        tensor_cal_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         copy_inst->execute(*accessable_reg, accessable_memory, accessable_router);
     }; // perform the operations in the current cycle
 
@@ -58,6 +64,17 @@ public:
         std::cout << std::endl;
     }
 
+    template<typename T>
+    void display_reg_as(int idx) {
+        assert(idx < 2048);
+        VectorData data = (*accessable_reg)[idx].read_reg();
+        auto* data_ptr = reinterpret_cast<T*>(data.data());
+        for (int i=0;i<128/sizeof(T);i++) {
+            std::cout << data_ptr[i] << " ";
+        }
+        std::cout << std::endl;
+    }
+
     void display_regfile() {
         for (const auto& innerVec : (*accessable_reg)) {
             for (uint8_t num : innerVec.read_reg()) {
@@ -66,7 +83,14 @@ public:
             std::cout << std::endl;
         }
     }
+
 private:
+    std::shared_ptr<Inst> load_inst;
+    std::shared_ptr<Inst> store_inst;
+    std::shared_ptr<Inst> cal_inst;
+    std::shared_ptr<Inst> copy_inst;
+    std::shared_ptr<Inst> tensor_cal_inst;
+
     std::shared_ptr<Inst> current_inst;
     std::shared_ptr<LocalScheduler> scheduler;
 

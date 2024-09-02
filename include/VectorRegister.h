@@ -6,6 +6,7 @@
 class VectorRegister;
 typedef std::vector<VectorRegister> VectorRegisterFile;
 typedef std::array<uint8_t, 128> VectorData;
+typedef std::array<uint8_t, 512> TensorData;
 
 /* 1024 bit vector register */
 class VectorRegister {

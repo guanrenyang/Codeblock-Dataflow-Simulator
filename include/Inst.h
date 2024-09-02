@@ -52,8 +52,27 @@ public:
     int dst;
     int src0;
     int src1;
-    CalInst(int opcode, int dst, int src0, int src1) : opcode(opcode), dst(dst), src0(src0), src1(src1) {}
+
+    int total_cycles;
+    int remaining_cycles;
+
+    CalInst(int opcode, int dst, int src0, int src1, int cycles = 1) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles), total_cycles(cycles) {}
     ~CalInst() {}
+    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
+};
+
+class TensorCalInst final: public Inst {
+public:
+    int opcode;
+    int dst;
+    int src0;
+    int src1;
+
+    int total_cycles;
+    int remaining_cycles;
+
+    TensorCalInst(int opcode, int dst, int src0, int src1, int cycles = 48) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles), total_cycles(cycles) {}
+    ~TensorCalInst() {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
@@ -63,7 +82,8 @@ public:
     int dst_pe_col;
     int dst_reg_idx;
     int addr;
-    LdInst(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr) : dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), addr(addr) {}
+    bool is_tensor;
+    LdInst(int dst_pe_row, int dst_pe_col, int dst_reg_idx, uint32_t addr, bool is_tensor = false) : dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), addr(addr), is_tensor(is_tensor) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
@@ -73,7 +93,8 @@ public:
     int src_pe_col;
     int src_reg_idx;
     uint32_t addr;
-    StInst(int src_pe_row, int src_pe_col, int src_reg_idx, uint32_t addr) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), addr(addr) {}
+    bool is_tensor;
+    StInst(int src_pe_row, int src_pe_col, int src_reg_idx, uint32_t addr, bool is_tensor = false) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), addr(addr), is_tensor(is_tensor) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
@@ -85,9 +106,12 @@ public:
     int dst_pe_col;
     int src_reg_idx;
     int dst_reg_idx;
-    CopyInst(int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx) {}
+
+    bool is_tensor;
+    CopyInst(int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx, int is_tensor = false) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), is_tensor(is_tensor) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
+
 class NopInst final: public Inst {
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
         finished = true;
