@@ -140,6 +140,9 @@ void Inst::remove_async_inst() {
 }
 
 void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
+    if (remaining_cycles==total_cycles) {
+        this->register_async_inst();
+    }
     if (remaining_cycles > 1) {
         remaining_cycles--;
         return;
@@ -165,9 +168,13 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
 
     reg[dst].write_reg(dst_data);
     finished = true;
+    this->remove_async_inst();
 };
 
 void TensorCalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM> &memory, const std::shared_ptr<Router> &router) {
+    if (remaining_cycles==total_cycles) {
+        this->register_async_inst();
+    }
     if (remaining_cycles > 1) {
         remaining_cycles--;
         return;
@@ -200,6 +207,7 @@ void TensorCalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM> 
         reg[dst + i].write_reg(dst_vec);
     }
     finished = true;
+    this->remove_async_inst();
 }
 
 void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
