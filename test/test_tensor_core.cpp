@@ -43,6 +43,7 @@ std::shared_ptr<DataFlowGraph> matmul_16_16_16(PEArray & pe_array){
 
     // calculation
     dfg->appendTensorCal(cal_cb, 0, 8, 0, 4);
+    // dfg->appendCal(cal_cb, 0, 100, 100, 100);
 
     // store result
     dfg->appendStore(store_cb, 0, 0, 8, 8*128, true);

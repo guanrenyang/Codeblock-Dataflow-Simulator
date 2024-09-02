@@ -52,10 +52,11 @@ public:
     int dst;
     int src0;
     int src1;
-    
+
+    int total_cycles;
     int remaining_cycles;
 
-    CalInst(int opcode, int dst, int src0, int src1, int cycles = 1) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles) {}
+    CalInst(int opcode, int dst, int src0, int src1, int cycles = 1) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles), total_cycles(cycles) {}
     ~CalInst() {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
@@ -67,9 +68,10 @@ public:
     int src0;
     int src1;
 
+    int total_cycles;
     int remaining_cycles;
 
-    TensorCalInst(int opcode, int dst, int src0, int src1, int cycles = 1) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles) {}
+    TensorCalInst(int opcode, int dst, int src0, int src1, int cycles = 48) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles), total_cycles(cycles) {}
     ~TensorCalInst() {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
