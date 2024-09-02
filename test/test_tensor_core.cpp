@@ -38,17 +38,14 @@ std::shared_ptr<DataFlowGraph> matmul_16_16_16(PEArray & pe_array){
     pe_array.add_CodeBlock(0, 0, store_cb);
 
     // prepare input
-    for(int i=0;i<8;i++)
-        dfg->appendLoad(load_cb, 0, 0, i, i*128);
+    dfg->appendLoad(load_cb, 0, 0, 0, 0*128, true);
+    dfg->appendLoad(load_cb, 0, 0, 4, 4*128, true);
 
     // calculation
     dfg->appendTensorCal(cal_cb, 0, 8, 0, 4);
 
     // store result
-    dfg->appendStore(store_cb, 0, 0, 8, 8*128);
-    dfg->appendStore(store_cb, 0, 0, 9, 9*128);
-    dfg->appendStore(store_cb, 0, 0, 10, 10*128);
-    dfg->appendStore(store_cb, 0, 0, 11, 11*128);
+    dfg->appendStore(store_cb, 0, 0, 8, 8*128, true);
 
     return dfg;
 }

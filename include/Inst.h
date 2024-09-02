@@ -91,7 +91,8 @@ public:
     int src_pe_col;
     int src_reg_idx;
     uint32_t addr;
-    StInst(int src_pe_row, int src_pe_col, int src_reg_idx, uint32_t addr) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), addr(addr) {}
+    bool is_tensor;
+    StInst(int src_pe_row, int src_pe_col, int src_reg_idx, uint32_t addr, bool is_tensor = false) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), addr(addr), is_tensor(is_tensor) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
 
