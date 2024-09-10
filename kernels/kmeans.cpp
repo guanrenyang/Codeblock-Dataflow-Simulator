@@ -1,7 +1,7 @@
 #include "DataFlowGraph.h"
 #include "PEArray.h"
-#include <memory>
 #include "Opcode.h"
+#include <memory>
 #include <cmath>
 
 #define points 2

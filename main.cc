@@ -5,16 +5,20 @@
 
 int display(PEArray & pe_array, int cycle);
 
-std::shared_ptr<DataFlowGraph> kmeans(PEArray & pe_array);
+#define KERNEL_NAME vector_add
+
+std::shared_ptr<DataFlowGraph> KERNEL_NAME(PEArray & pe_array);
 
 int main() {
     PEArray pe_array(4, 4, 6*1024*1024);
 
-    auto dfg = kmeans(pe_array);
-    
+    auto dfg = KERNEL_NAME(pe_array);
+
+    /*
     std::ofstream outfile("output.txt");
     std::streambuf* coutBuf = std::cout.rdbuf();
     std::cout.rdbuf(outfile.rdbuf());
+    */
 
     display(pe_array, 0);
     int cycle_idx = 0;
