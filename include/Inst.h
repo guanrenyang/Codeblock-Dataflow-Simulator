@@ -2,6 +2,7 @@
 #define INST_H
 
 #include "common.h"
+#include "Opcode.h"
 
 class Router;
 class SPM;
@@ -56,7 +57,20 @@ public:
     int total_cycles;
     int remaining_cycles;
 
-    CalInst(int opcode, int dst, int src0, int src1, int cycles = 1) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles), total_cycles(cycles) {}
+    CalInst(int opcode, int dst, int src0, int src1) : opcode(opcode), dst(dst), src0(src0), src1(src1) {
+        CalInstType type = getCalInstType(opcode);
+        switch (type) {
+            case CalInstType::FP32:
+                total_cycles = remaining_cycles = 4;
+                break;
+            case CalInstType::FP16:
+                total_cycles = remaining_cycles = 2;
+                break;
+            case CalInstType::INT8:
+                total_cycles = remaining_cycles = 1;
+                break;
+        }
+    }
     ~CalInst() {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
@@ -71,7 +85,17 @@ public:
     int total_cycles;
     int remaining_cycles;
 
-    TensorCalInst(int opcode, int dst, int src0, int src1, int cycles = 48) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles), total_cycles(cycles) {}
+    TensorCalInst(int opcode, int dst, int src0, int src1) : opcode(opcode), dst(dst), src0(src0), src1(src1) {
+        TensorCalInstType type = getTensorCalInstType(opcode);
+        switch (type) {
+            case TensorCalInstType::FP16_TENSOR:
+                total_cycles = remaining_cycles = 6;
+                break;
+            case TensorCalInstType::INT8_TENSOR:
+                total_cycles = remaining_cycles = 4;
+                break;
+        }
+    }
     ~TensorCalInst() {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };

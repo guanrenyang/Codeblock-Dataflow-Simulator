@@ -8,8 +8,11 @@
 #include "CodeBlock.h"
 #include "LocalScheduler.h"
 #include "SPM.h"
+#include "PipelinedCalUnit.h"
 #include <memory>
 #include <utility>
+
+
 class PE {
 public:
     PE(std::shared_ptr<Router> router_ptr = nullptr, std::shared_ptr<VectorRegisterFile> reg_file = nullptr, std::shared_ptr<SPM> spm_ptr = nullptr)  {
@@ -18,24 +21,59 @@ public:
         accessable_reg = std::move(reg_file);
         accessable_memory = std::move(spm_ptr);
         accessable_router = std::move(router_ptr);
+
+        pipelined_cal_unit = std::make_shared<PipelinedCalUnit>(accessable_reg);
+        pipelined_tensor_core = std::make_shared<PipelinedTensorCalUnit>(accessable_reg);
     }
 
     void execute_cycle() {
         load_inst = scheduler->getReadyInstruction<LdInst>();
-        store_inst = scheduler->getReadyInstruction<StInst>();
-        if (cal_inst == nullptr || cal_inst->is_finished()) {
-            cal_inst = scheduler->getReadyInstruction<CalInst>();
-        }
-        if (tensor_cal_inst == nullptr || tensor_cal_inst->is_finished()) {
-            tensor_cal_inst = scheduler->getReadyInstruction<TensorCalInst>();
-        }
-        copy_inst = scheduler->getReadyInstruction<CopyInst>();
-
         load_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+
+        store_inst = scheduler->getReadyInstruction<StInst>();
         store_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        cal_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        tensor_cal_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+
+        copy_inst = scheduler->getReadyInstruction<CopyInst>();
         copy_inst->execute(*accessable_reg, accessable_memory, accessable_router);
+
+        /* Pipelined Cal Unit */
+        if(cal_inst_to_issue == nullptr) {
+            cal_inst_to_issue = scheduler->getReadyInstruction<CalInst>();
+            if(std::dynamic_pointer_cast<CalInst>(cal_inst_to_issue) == nullptr){
+                cal_inst_to_issue = nullptr;
+            }
+        }
+
+        if(cal_inst_to_issue != nullptr) {
+            assert(std::dynamic_pointer_cast<CalInst>(cal_inst_to_issue) != nullptr);
+            if(pipelined_cal_unit->can_issue(std::dynamic_pointer_cast<CalInst>(cal_inst_to_issue))) {
+                pipelined_cal_unit->issue(std::dynamic_pointer_cast<CalInst>(cal_inst_to_issue));
+                cal_inst_to_issue = nullptr;
+            }
+        }
+
+        pipelined_cal_unit->execute_instructions();
+        pipelined_cal_unit->evict_finished_instructions();
+        /* End of Pipelined Cal Unit */
+
+        /* Pipelined Tensor Core */
+        if(tensor_cal_inst_to_issue == nullptr){
+            tensor_cal_inst_to_issue = scheduler->getReadyInstruction<TensorCalInst>();
+            if(std::dynamic_pointer_cast<TensorCalInst>(tensor_cal_inst_to_issue) == nullptr){
+                tensor_cal_inst_to_issue = nullptr;
+            }
+        }
+
+        if(tensor_cal_inst_to_issue != nullptr) {
+            assert(std::dynamic_pointer_cast<TensorCalInst>(tensor_cal_inst_to_issue) != nullptr);
+            if(pipelined_tensor_core->can_issue(std::dynamic_pointer_cast<TensorCalInst>(tensor_cal_inst_to_issue))) {
+                pipelined_tensor_core->issue(std::dynamic_pointer_cast<TensorCalInst>(tensor_cal_inst_to_issue));
+                tensor_cal_inst_to_issue = nullptr;
+            }
+        }
+
+        pipelined_tensor_core->execute_instructions();
+        pipelined_tensor_core->evict_finished_instructions();
     }; // perform the operations in the current cycle
 
     void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {
@@ -48,6 +86,8 @@ public:
 
     void set_register_file(std::shared_ptr<VectorRegisterFile> reg_file) {
         accessable_reg = std::move(reg_file);
+        pipelined_cal_unit->set_register_file(accessable_reg);
+        pipelined_tensor_core->set_register_file(accessable_reg);
     }
 
     void set_router(std::shared_ptr<Router> router_ptr) {
@@ -87,9 +127,9 @@ public:
 private:
     std::shared_ptr<Inst> load_inst;
     std::shared_ptr<Inst> store_inst;
-    std::shared_ptr<Inst> cal_inst;
+    std::shared_ptr<Inst> cal_inst_to_issue;
     std::shared_ptr<Inst> copy_inst;
-    std::shared_ptr<Inst> tensor_cal_inst;
+    std::shared_ptr<Inst> tensor_cal_inst_to_issue;
 
     std::shared_ptr<Inst> current_inst;
     std::shared_ptr<LocalScheduler> scheduler;
@@ -99,6 +139,8 @@ private:
     std::shared_ptr<VectorRegisterFile> accessable_reg;
     std::shared_ptr<Router> accessable_router;
 
+    std::shared_ptr<PipelinedCalUnit> pipelined_cal_unit;
+    std::shared_ptr<PipelinedTensorCalUnit> pipelined_tensor_core;
     // RouterFunctor putOnChip;
 };
 #endif
