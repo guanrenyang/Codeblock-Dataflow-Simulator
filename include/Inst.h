@@ -53,10 +53,11 @@ public:
     int dst;
     int src0;
     int src1;
+    VectorData data;
     
     int remaining_cycles;
 
-    CalInst(int opcode, int dst, int src0, int src1, int cycles = 1) : opcode(opcode), dst(dst), src0(src0), src1(src1), remaining_cycles(cycles) {}
+    CalInst(int opcode, int dst, int src0, int src1, VectorData data = VectorData{}, int cycles = 1) : opcode(opcode), dst(dst), src0(src0), src1(src1), data(data), remaining_cycles(cycles) {}
     ~CalInst() {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
@@ -97,23 +98,7 @@ public:
     CopyInst(int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx, int simulation_cycles = 0) : src_pe_row(src_pe_row), src_pe_col(src_pe_col), src_reg_idx(src_reg_idx), dst_pe_row(dst_pe_row), dst_pe_col(dst_pe_col), dst_reg_idx(dst_reg_idx), simulation_cycles(simulation_cycles) {}
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
 };
-class MovImmInst final: public Inst {
-public:
-    int reg_idx;
-    VectorData data;
 
-    MovImmInst(int reg_idx, VectorData &data): reg_idx(reg_idx), data(data) {}
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
-};
-
-class MovRegInst final: public Inst {
-public:
-    int src;
-    int dst;
-
-    MovRegInst(int src, int dst):src(src), dst(dst) {}
-    void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router);
-};
 class NopInst final: public Inst {
     void execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
         finished = true;

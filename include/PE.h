@@ -27,15 +27,11 @@ public:
             cal_inst = scheduler->getReadyInstruction<CalInst>();
         }
         copy_inst = scheduler->getReadyInstruction<CopyInst>();
-        mov_imm_inst = scheduler->getReadyInstruction<MovImmInst>();
-        mov_reg_inst = scheduler->getReadyInstruction<MovRegInst>();
 
         load_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         store_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         cal_inst->execute(*accessable_reg, accessable_memory, accessable_router);
         copy_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        mov_imm_inst->execute(*accessable_reg, accessable_memory, accessable_router);
-        mov_reg_inst->execute(*accessable_reg, accessable_memory, accessable_router);
     }; // perform the operations in the current cycle
 
     void add_CodeBlock(std::shared_ptr<CodeBlock> code_block) {
@@ -77,8 +73,6 @@ private:
     std::shared_ptr<Inst> store_inst;
     std::shared_ptr<Inst> cal_inst;
     std::shared_ptr<Inst> copy_inst;
-    std::shared_ptr<Inst> mov_imm_inst;
-    std::shared_ptr<Inst> mov_reg_inst;
 
 
     std::shared_ptr<Inst> current_inst;

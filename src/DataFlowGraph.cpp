@@ -19,8 +19,8 @@ std::shared_ptr<CodeBlock> DataFlowGraph::createDependentCodeBlock(std::shared_p
     return code_block;
 }
 
-void DataFlowGraph::appendCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1, int cycles) {
-    std::shared_ptr<Inst> cal_inst = std::make_shared<CalInst>(opcode, dst, src0, src1, cycles);
+void DataFlowGraph::appendCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1, VectorData data, int cycles) {
+    std::shared_ptr<Inst> cal_inst = std::make_shared<CalInst>(opcode, dst, src0, src1, data, cycles);
     code_block->append_instruction(cal_inst);
     Inst_list.push_back(cal_inst);
 }
@@ -41,18 +41,6 @@ void DataFlowGraph::appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe
     std::shared_ptr<Inst> copy_inst = std::make_shared<CopyInst>(src_pe_row, src_pe_col, src_reg_idx, dst_pe_row, dst_pe_col, dst_reg_idx, simulation_cycles);
     code_block->append_instruction(copy_inst);
     Inst_list.push_back(copy_inst);
-}
-
-void DataFlowGraph::appendMovImm(std::shared_ptr<CodeBlock> code_block, int reg_idx, VectorData &data ) {
-    std::shared_ptr<Inst> mov_imm_inst = std::make_shared<MovImmInst>(reg_idx, data);
-    code_block->append_instruction(mov_imm_inst);
-    Inst_list.push_back(mov_imm_inst);
-}
-
-void DataFlowGraph::appendMovReg(std::shared_ptr<CodeBlock> code_block, int src, int dst) {
-    std::shared_ptr<Inst> mov_reg_inst = std::make_shared<MovRegInst>(src, dst);
-    code_block->append_instruction(mov_reg_inst);
-    Inst_list.push_back(mov_reg_inst);
 }
 
 void DataFlowGraph::signalDownstream() {

@@ -23,6 +23,7 @@ VectorData get_vector_data(float data)
     for (int i = 0; i < num_elements; ++i) {
         res_ptr[i] = data;
     }
+    return res;
 }
 
 std::array<uint32_t, 32> shuffle_data = {
@@ -149,11 +150,14 @@ void butterfly(std::shared_ptr<DataFlowGraph> &dfg,
                 VectorData imag_angle_data = get_vector_data(imag_angle);
                 VectorData real_angle_data = get_vector_data(real_angle);
 
-                dfg->appendMovImm(butterfly_compute[cb_idx], angle_real_reg, real_angle_data);
-                dfg->appendMovImm(butterfly_compute[cb_idx], angle_imag_reg, imag_angle_data);
+                dfg->appendCal(butterfly_compute[cb_idx], 11, angle_real_reg, 0, 0, real_angle_data);
+                dfg->appendCal(butterfly_compute[cb_idx], 11, angle_imag_reg, 0, 0, imag_angle_data);
 
-                dfg->appendCal(butterfly_compute[cb_idx], 10, twiddle_real_reg, angle_real_reg, 0, 4);
-                dfg->appendCal(butterfly_compute[cb_idx], 10, twiddle_imag_reg, angle_imag_reg, 0, 4);
+                //dfg->appendMovImm(butterfly_compute[cb_idx], angle_real_reg, real_angle_data);
+                //dfg->appendMovImm(butterfly_compute[cb_idx], angle_imag_reg, imag_angle_data);
+
+                dfg->appendCal(butterfly_compute[cb_idx], 10, twiddle_real_reg, angle_real_reg, 0, VectorData{}, 4);
+                dfg->appendCal(butterfly_compute[cb_idx], 10, twiddle_imag_reg, angle_imag_reg, 0, VectorData{}, 4);
 
                 //dfg->appendMovImm(butterfly_compute[cb_idx], twiddle_real_reg,
                 //                  twiddle_real);
@@ -199,10 +203,15 @@ void butterfly(std::shared_ptr<DataFlowGraph> &dfg,
                 // 根据 PE 的相对位置存储 A+BW 和 A-BW
                 if (pair_index > index) {
                     // A+BW存放在A的位置， A-BW存放在另一个PE上A的位置
+                    dfg->appendCal(butterfly_compute[cb_idx], 12, real_data_A, real_A_plus_BW, 0);
+                    dfg->appendCal(butterfly_compute[cb_idx], 12, imag_data_A, imag_A_plus_BW, 0);
+
+                    /*
                     dfg->appendMovReg(butterfly_compute[cb_idx], real_A_plus_BW,
                                       real_data_A);
                     dfg->appendMovReg(butterfly_compute[cb_idx], imag_A_plus_BW,
                                       imag_data_A);
+                    */
                     dfg->appendCopy(butterfly_compute[cb_idx], pe_row, pe_col,
                                     real_A_sub_BW, pair_pe_row, pair_pe_col,
                                     real_data_A, simulation_cycles);
@@ -211,10 +220,14 @@ void butterfly(std::shared_ptr<DataFlowGraph> &dfg,
                                     imag_data_A, simulation_cycles);
                 } else {
                     // A-BW存放在B的位置， A+BW存放在另一个PE上B的位置
+                    dfg->appendCal(butterfly_compute[cb_idx], 12, real_data_B, real_A_sub_BW, 0);
+                    dfg->appendCal(butterfly_compute[cb_idx], 12, imag_data_B, imag_A_sub_BW, 0);
+                    /*
                     dfg->appendMovReg(butterfly_compute[cb_idx], real_A_sub_BW,
                                       real_data_B);
                     dfg->appendMovReg(butterfly_compute[cb_idx], imag_A_sub_BW,
                                       imag_data_B);
+                    */
                     dfg->appendCopy(butterfly_compute[cb_idx], pe_row, pe_col,
                                     real_A_plus_BW, pair_pe_row, pair_pe_col,
                                     real_data_B, simulation_cycles);
@@ -361,8 +374,10 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
                 std::memcpy(shuffle_mask.data(), shuffle_data.data(),
                             shuffle_mask.size());
                 
-                dfg->appendMovImm(load_and_shuffle[index],
-                            NUM_IN_USE_REG_PER_PE * 2, shuffle_mask);
+                dfg->appendCal(load_and_shuffle[index], 11, NUM_IN_USE_REG_PER_PE * 2, 0, 0, shuffle_mask);
+                
+                //dfg->appendMovImm(load_and_shuffle[index],
+                //            NUM_IN_USE_REG_PER_PE * 2, shuffle_mask);
                 
                 for (int reg_id = 0; reg_id < NUM_IN_USE_REG_PER_PE; reg_id++) {
                     dfg->appendCal(load_and_shuffle[index], 9, reg_id * 2, reg_id *
@@ -388,8 +403,10 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
             dfg->appendCal(butterfly_compute_1[index], 1, 3, 1, 3);    
 
             // | reg0 | reg1 |=  | reg4 | reg5 | (A + B)
-            dfg->appendMovReg(butterfly_compute_1[index], 0, 4);
-            dfg->appendMovReg(butterfly_compute_1[index], 1, 5);
+            dfg->appendCal(butterfly_compute_1[index], 12, 0, 4, 0);
+            dfg->appendCal(butterfly_compute_1[index], 12, 1, 5, 0);
+            //dfg->appendMovReg(butterfly_compute_1[index], 0, 4);
+            //dfg->appendMovReg(butterfly_compute_1[index], 1, 5);
         }
     }
 
@@ -455,8 +472,10 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
             dfg->appendCal(butterfly_compute_1[index], 1, 3, 1, 3);
 
             // | reg0 | reg1 |=  | reg4 | reg5 | (A + B)
-            dfg->appendMovReg(butterfly_compute_1[index], 0, 4);
-            dfg->appendMovReg(butterfly_compute_1[index], 1, 5);
+            dfg->appendCal(butterfly_compute_1[index], 12, 0, 4, 0);
+            dfg->appendCal(butterfly_compute_1[index], 12, 1, 5, 0);
+            //dfg->appendMovReg(butterfly_compute_1[index], 0, 4);
+            //dfg->appendMovReg(butterfly_compute_1[index], 1, 5);
         }
     }
     
@@ -485,8 +504,4 @@ std::shared_ptr<DataFlowGraph> fft_1024(PEArray &pe_array) {
         }
     }
     return dfg;
-}
-
-std::shared_ptr<DataFlowGraph> fft_65536(PEArray &pe_array) {
-    return nullptr;
 }
