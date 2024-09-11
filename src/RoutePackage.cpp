@@ -17,12 +17,18 @@ bool RoutePackage::is_completed(){
     return completed;
 }
 
-CopyDataPackage::CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row, int dst_pe_col, int reg_idx, VectorData vector_data, std::shared_ptr<Inst> inst) : RoutePackage(inst) {
+CopyDataPackage::CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row, int dst_pe_col, int reg_idx, int simulation_cycles, VectorData vector_data, std::shared_ptr<Inst> inst) : RoutePackage(inst) {
     this->dst_pe_row_idx = dst_pe_row;
     this->dst_pe_col_idx = dst_pe_col;
     this->reg_idx = reg_idx;
     this->data = vector_data;
-    this->remaining_hops = std::abs(src_pe_row - dst_pe_row) + std::abs(src_pe_col - dst_pe_col);
+    if(simulation_cycles != 0)
+    {
+        this->remaining_hops = simulation_cycles;
+    }
+    else{
+        this->remaining_hops = std::abs(src_pe_row - dst_pe_row) + std::abs(src_pe_col - dst_pe_col);
+    }
 #ifdef DEBUG
     std::cout << "CopyDataPackage create: " << src_pe_row << " " << src_pe_col << " to " << dst_pe_row << " " << dst_pe_col << " " << reg_idx << std::endl;
 #endif

@@ -16,8 +16,8 @@ public:
 
     void appendLoad(std::shared_ptr<CodeBlock> code_block, int dst_pe_row, int dst_pe_col, int dst_reg_idx, int spm_addr, int interval = 1);
     void appendStore(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int spm_addr, int interval = 1);
-    void appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx);
-    void appendCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1);
+    void appendCopy(std::shared_ptr<CodeBlock> code_block, int src_pe_row, int src_pe_col, int src_reg_idx, int dst_pe_row, int dst_pe_col, int dst_reg_idx, int simulation_cycles = 0);
+    void appendCal(std::shared_ptr<CodeBlock> code_block, int opcode, int dst, int src0, int src1, int cycles = 1);
     void appendMovImm(std::shared_ptr<CodeBlock> code_block, int reg_id, VectorData &data);
     void appendMovReg(std::shared_ptr<CodeBlock> code_block, int src, int dst);
 

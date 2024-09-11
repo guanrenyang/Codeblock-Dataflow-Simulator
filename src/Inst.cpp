@@ -175,12 +175,29 @@ static void shuffle(VectorData& dst, const VectorData& src, const VectorData& sh
     std::vector<T> temp_ptr(num_element);
 
     for (int i = 0; i < num_element; i++) {
-        int shuffle_index = static_cast<int>(sm_ptr[i]);
+        uint32_t shuffle_index = static_cast<uint32_t>(sm_ptr[i]);
         assert(shuffle_index >= 0 && shuffle_index < num_element);
         temp_ptr[i] = src_ptr[shuffle_index];
     }
 
     std::memcpy(dst.data(), temp_ptr.data(), dst.size());
+}
+
+template <typename T>
+static void sin_vv(VectorData& dst, const VectorData& src0, const VectorData& src1) {
+    // src1 is discarded
+    int num_element = dst.size() / sizeof(T);
+    
+    VectorData temp;
+    T* temp_ptr = reinterpret_cast<T*>(temp.data());
+
+    const T* src0_ptr = reinterpret_cast<const T*>(src0.data());
+
+    for (int i = 0; i < num_element; i++) {
+        temp_ptr[i] = sin(src0_ptr[i]);
+    }
+
+    std::memcpy(dst.data(), temp.data(), dst.size());
 }
 
 
@@ -222,6 +239,7 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
         case 7: gt_vv<float>(dst_data, src0_data, src1_data); break;
         case 8: v_add<float>(dst_data, src0_data, src1_data); break;
         case 9: shuffle<float>(dst_data, src0_data, src1_data); break;
+        case 10: sin_vv<float>(dst_data, src0_data, src1_data); break;
     }
 
     reg[dst].write_reg(dst_data);
@@ -231,7 +249,7 @@ void CalInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memor
 void CopyInst::execute(VectorRegisterFile &reg, const std::shared_ptr<SPM>& memory, const std::shared_ptr<Router>& router) {
     // Put data on on-chip router
     VectorData src_data = reg[src_reg_idx].read_reg();
-    std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, src_data, shared_from_this());
+    std::shared_ptr<RoutePackage> copy_data_package = std::make_shared<CopyDataPackage>(src_pe_row, src_pe_col, dst_pe_row, dst_pe_col, dst_reg_idx, simulation_cycles, src_data, shared_from_this());
     router->put(copy_data_package);
 
     // register the async instruction

@@ -24,7 +24,7 @@ public:
 
 class CopyDataPackage final : public RoutePackage {
 public:
-    CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row, int dst_pe_col, int reg_idx, VectorData vector_data, std::shared_ptr<Inst> inst);
+    CopyDataPackage(int src_pe_row, int src_pe_col, int dst_pe_row, int dst_pe_col, int reg_idx, int simulation_cycles, VectorData vector_data, std::shared_ptr<Inst> inst);
     void operate(std::shared_ptr<Router> router) ; 
     
     int dst_pe_row_idx;
